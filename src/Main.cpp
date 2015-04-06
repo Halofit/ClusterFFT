@@ -31,17 +31,19 @@ bool isPow2(size_t x);
 size_t getLog2(size_t x);
 
 ComplexArr modifyArray(ComplexArr arr, int action);
-
 ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
+
+
+ComplexArr normalise(ComplexArr arr);
+float* writeToFloat(ComplexArr arr);
 ComplexArr getZeros(size_t length);
 ComplexArr getRange(int start, size_t length, int stride);
 void printArr(ComplexArr arr);
 void printArr(ComplexArr arr, int start, int ammount);
 void printArr(float* arr, int start, int ammount);
 
-ComplexArr normalise(ComplexArr arr);
-float* writeToFloat(ComplexArr arr);
+
 
 struct mpiGlobals {
 	int procs;
@@ -98,8 +100,6 @@ int main(int argc, char* argv[]){
 			x[i] = Complex(0.f, 0.f);
 		}
 	}
-		
-	printf("%u\n", x.size());
 
 	initCounter();
 	startCounter();
@@ -109,9 +109,6 @@ int main(int argc, char* argv[]){
 	ComplexArr x2 = recurIFFT(xInter);
 
 	double time = getCounter();
-
-	printArr(x,100,20);
-	printArr(normalise(x2),100,20);
 	printf("Time: %fms\n", time);
 
 	SNDFILE *outSF;
@@ -178,7 +175,7 @@ ComplexArr modifyArray(ComplexArr arr, int action){
 
 		case 2 :{
 			//dobimo dominantne frekvence
-			retVal = arr*arr;
+			retVal = arr*arr*arr;
 		}
 		break;
 
