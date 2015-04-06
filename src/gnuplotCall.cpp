@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,16 +11,18 @@
 // and on Windows we need to use the piped version of gnuplot
 #ifdef _WIN32
     #define GNUPLOT_NAME "gnuplot --persist"
+	#define POPEN _popen
+	#define PCLOSE _pclose
 #else 
     #define GNUPLOT_NAME "gnuplot"
+	#define POPEN popen
+	#define PCLOSE pclose
 #endif
 
+
+
 int drawWithGnuplot() {
-    #ifdef _WIN32
-        FILE *pipe = _popen(GNUPLOT_NAME, "w");
-    #else
-        FILE *pipe = popen(GNUPLOT_NAME, "w");
-    #endif
+	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
     if (pipe != NULL) {
         fprintf(pipe, "set term wx\n");         // set the terminal
@@ -31,14 +32,9 @@ int drawWithGnuplot() {
         fprintf(pipe, "%s\n", "e");             // termination character
         fflush(pipe);                           // flush the pipe
 
-
-        #ifdef _WIN32
-                _pclose(pipe);
-        #else
-                pclose(pipe);
-        #endif
+		PCLOSE(pipe);
 	}else{
-	    std::cout << "Could not open pipe" << std::endl; 
+	    printf("Could not open pipe\n"); 
 	}
     
 	return 0;
