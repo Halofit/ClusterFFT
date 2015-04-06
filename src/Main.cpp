@@ -30,6 +30,8 @@ bool operator <(const Complex &a, const Complex &b){
 bool isPow2(size_t x);
 size_t getLog2(size_t x);
 
+ComplexArr modifyArray(ComplexArr arr, int action);
+
 ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
 ComplexArr getZeros(size_t length);
@@ -48,8 +50,6 @@ struct mpiGlobals {
 
 #include "sndfile.h"
 
-#define CPLX0 Complex(0.,0.);
-#define OPEN_SOUND true
 
 int main(int argc, char* argv[]){
 	
@@ -78,134 +78,122 @@ int main(int argc, char* argv[]){
 	size_t num = sf_read_float(sf, buf, num_items);
 	sf_close(sf);
 	printf("Read %d items\n",num);
-	if(buf == nullptr) {
-		printf("Error opening file");
-		exit(0);
-	}
+	sf_close(sf);
 
-
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &mpi.procs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &mpi.procId);
-
-	if(mpi.procId == 0){
-		ComplexArr x;
-		if(!OPEN_SOUND){
-			ComplexArr x = getRange(0,8,1);
-			//printArr(x);
-			x = x*Complex(2.,0.)/Complex(8.,0);
-			x = Complex(M_PI,0.)*x;
-
-			//x = std::sin(x);
-			for (int i = 0; i < x.size(); i++) {
-				x[i] = std::sin(x[i]);
-			}
-		}else{
-			size_t totalLen = num_items;
-			if(!isPow2(num_items)){
-				size_t i;
-				for (i = 1; num_items>i; i*=2);
-				totalLen = i;
-				printf("%u %u\n", totalLen, num_items);
+	ComplexArr x;
+	size_t totalLen = num_items;
+	if(!isPow2(num_items)){
+		size_t i;
+		for (i = 1; num_items>i; i*=2);
+		totalLen = i;
+		printf("%u %u\n", totalLen, num_items);
 				
-			}
-
-			x = ComplexArr(totalLen);
-			for (size_t i = 0; i < totalLen; i++) {
-				if(i < num_items){
-					x[i] = Complex(buf[i], 0.f);
-				}else{
-					x[i] = Complex(0.f, 0.f);
-				}
-			}
-		}
-		
-		printf("%u\n", x.size());
-
-		initCounter();
-		startCounter();
-
-		ComplexArr x1 = recurFFT(x);
-
-		int n = 1000;
-		ComplexArr x1inter = getZeros(x1.size());
-		x1inter = x1[std::slice(0, x1.size()-n, 1)];
-		x1[std::slice(n, x1.size()-n, 1)] = x1inter;
-
-		//dobimo dominantne frekvence
-		//ComplexArr x1inter = x1*x1;
-
-		ComplexArr x2 = recurIFFT(x1inter);
-
-		double time = getCounter();
-
-		printArr(x,100,20);
-		printArr(normalise(x2),100,20);
-		printf("Time: %fms\n", time);
-
-		SNDFILE *outSF;
-		SF_INFO oi;
-		oi.channels = 1;
-		oi.format = (SF_FORMAT_WAV | SF_FORMAT_FLOAT);
-		oi.frames = info.frames;
-		oi.samplerate = info.samplerate;
-		oi.sections = info.sections;
-		oi.seekable = info.seekable;
-
-		sf_close(sf);
-
-		/* Open the WAV file. */
-		outSF = sf_open("monoOut.wav", SFM_WRITE, &info);
-		if (sf == NULL){
-			printf("Failed to open the file.\n");
-			exit(-1);
-		}
-
-
-		x2 = normalise(x2);
-		float* outBuf = writeToFloat(x2);
-		printArr(outBuf,100,20);
-		size_t outSize = x2.size();
-		if (sf_write_float (outSF, outBuf, num_items) != 1) {
-			puts (sf_strerror (outSF));
-		}
-
-		sf_close(outSF);
-		
-		free(buf);
-		free(outBuf);
-
-	}else{
-		mpiWaitForData();
 	}
 
-	MPI_Finalize();
+	x = ComplexArr(totalLen);
+	for (size_t i = 0; i < totalLen; i++) {
+		if(i < num_items){
+			x[i] = Complex(buf[i], 0.f);
+		}else{
+			x[i] = Complex(0.f, 0.f);
+		}
+	}
+		
+	printf("%u\n", x.size());
+
+	initCounter();
+	startCounter();
+
+	ComplexArr x1 = recurFFT(x);
+	ComplexArr xInter = modifyArray(x1, 2);
+	ComplexArr x2 = recurIFFT(xInter);
+
+	double time = getCounter();
+
+	printArr(x,100,20);
+	printArr(normalise(x2),100,20);
+	printf("Time: %fms\n", time);
+
+	SNDFILE *outSF;
+	SF_INFO oi;
+	oi.channels = 1;
+	oi.format = (SF_FORMAT_WAV | SF_FORMAT_FLOAT);
+	oi.frames = info.frames;
+	oi.samplerate = info.samplerate;
+	oi.sections = info.sections;
+	oi.seekable = info.seekable;
+
+		
+
+	/* Open the WAV file. */
+	outSF = sf_open("monoOut.wav", SFM_WRITE, &info);
+	if (sf == NULL){
+		printf("Failed to open the file.\n");
+		exit(-1);
+	}
+
+
+	x2 = normalise(x2);
+	float* outBuf = writeToFloat(x2);
+	printArr(outBuf,100,20);
+	size_t outSize = x2.size();
+	if (sf_write_float (outSF, outBuf, num_items) != 1) {
+		puts (sf_strerror (outSF));
+	}
+
+	sf_close(outSF);
+		
+	free(buf);
+	free(outBuf);
 }
 
+void mpiWaitForData(){}
+
+/* MPI garbage zaenkrat leti ven dokler ne zrihtam ostalega
 void mpiWaitForData(){
 	int signal;
 	MPI_Recv(&signal, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-
-
 }
+{
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi.procs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi.procId);
 
-ComplexArr getRange(int start, size_t length, int stride){
-	ComplexArr r(length);
-	int val = start;
-	for (size_t i = 0; i < length; i++) {
-		r[i] = val;
-		val += stride;
-	}
-	return r;
+	MPI_Finalize();
 }
+*/
 
-ComplexArr getZeros(size_t length){
-	ComplexArr r(length);
-	for (size_t i = 0; i < length; i++) {
-		r[i] = 0;
+ComplexArr modifyArray(ComplexArr arr, int action){
+	ComplexArr retVal;
+	
+	switch(action){
+		case 1 :{
+			int n = 1000;
+			retVal = getZeros(arr.size());
+			ComplexArr inter = arr[std::slice(0, arr.size()-n, 1)];
+			retVal[std::slice(n, arr.size()-n, 1)] = inter;
+		}
+		break;
+
+		case 2 :{
+			//dobimo dominantne frekvence
+			retVal = arr*arr;
+		}
+		break;
+
+		case 3 :{
+			puts("Unimplemented!");
+			exit(0);
+		}
+		break;
+
+		case 0:
+		default:
+			retVal = arr;
 	}
-	return r;
+
+	return retVal;
 }
 
 
@@ -246,10 +234,10 @@ ComplexArr recurIFFT(ComplexArr arr){
 		ComplexArr yBottom = recurIFFT(arr[std::slice(1,m,2)]);
 
 		Complex root = std::exp(-2 * M_PI * Complex(0.f,1.f) / double(n));
-		root = Complex(1.,0.) / root; //TODO (idk if this works)
-		
-		
+		root = Complex(1.,0.) / root;
+
 		ComplexArr range = getRange(0, m, 1);
+
 		//ComplexArr d = std::pow(root, range);
 		for (size_t i = 0; i < m; i++) {
 			range[i] = std::pow(root, range[i]);
@@ -264,7 +252,28 @@ ComplexArr recurIFFT(ComplexArr arr){
 	}
 }
 
+
+ComplexArr getRange(int start, size_t length, int stride){
+	ComplexArr r(length);
+	int val = start;
+	for (size_t i = 0; i < length; i++) {
+		r[i] = val;
+		val += stride;
+	}
+	return r;
+}
+
+ComplexArr getZeros(size_t length){
+	ComplexArr r(length);
+	for (size_t i = 0; i < length; i++) {
+		r[i] = 0;
+	}
+	return r;
+}
+
+
 ComplexArr normalise(ComplexArr arr){
+#undef max //nevem tle neki teži
 	Complex max = arr.max();
 	return (arr / max);
 }
@@ -343,6 +352,17 @@ size_t getLog2(size_t x){
 		case  536870912:        return 29;
 		case 1073741824:        return 30;
 		default : return 0;
+	}
+}
+
+ComplexArr generateWave(int freq, size_t size){
+	ComplexArr x = getRange(0, size, 1);
+	
+	x = Complex(2.0*M_PI*freq,0.)*x;
+
+	//x = std::sin(x);
+	for (int i = 0; i < x.size(); i++) {
+		x[i] = std::sin(x[i]);
 	}
 }
 
