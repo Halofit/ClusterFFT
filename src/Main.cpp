@@ -12,7 +12,8 @@
 #include <valarray>
 #include <complex>
 
-
+#include "sndfile.h"
+#include "gnuplotCall.h"
 
 void initCounter();
 void startCounter();
@@ -50,11 +51,16 @@ struct mpiGlobals {
 	int procId;
 } mpi;
 
-#include "sndfile.h"
+
 
 
 int main(int argc, char* argv[]){
-	
+	if(true){
+		drawWithGnuplot();
+		exit(0);
+	}
+
+
 	float* buf;
 	SNDFILE *sf;
 	SF_INFO info;
@@ -80,7 +86,6 @@ int main(int argc, char* argv[]){
 	size_t num = sf_read_float(sf, buf, num_items);
 	sf_close(sf);
 	printf("Read %d items\n",num);
-	sf_close(sf);
 
 	ComplexArr x;
 	size_t totalLen = num_items;
@@ -101,29 +106,30 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	initCounter();
-	startCounter();
+	//initCounter();
+	//startCounter();
 
 	ComplexArr x1 = recurFFT(x);
 	ComplexArr xInter = modifyArray(x1, 2);
 	ComplexArr x2 = recurIFFT(xInter);
 
-	double time = getCounter();
-	printf("Time: %fms\n", time);
+	//double time = getCounter();
+	//printf("Time: %fms\n", time);
 
-	SNDFILE *outSF;
+
+	SNDFILE *outSF = nullptr;
 	SF_INFO oi;
 	oi.channels = 1;
-	oi.format = (SF_FORMAT_WAV | SF_FORMAT_FLOAT);
+	oi.format = info.format;
 	oi.frames = info.frames;
 	oi.samplerate = info.samplerate;
 	oi.sections = info.sections;
 	oi.seekable = info.seekable;
 
-		
-
+	
 	/* Open the WAV file. */
-	outSF = sf_open("monoOut.wav", SFM_WRITE, &info);
+	outSF = sf_open("monoOut.wav", SFM_WRITE, &oi);
+
 	if (sf == NULL){
 		printf("Failed to open the file.\n");
 		exit(-1);
@@ -132,7 +138,7 @@ int main(int argc, char* argv[]){
 
 	x2 = normalise(x2);
 	float* outBuf = writeToFloat(x2);
-	printArr(outBuf,100,20);
+	
 	size_t outSize = x2.size();
 	if (sf_write_float (outSF, outBuf, num_items) != 1) {
 		puts (sf_strerror (outSF));
@@ -175,7 +181,7 @@ ComplexArr modifyArray(ComplexArr arr, int action){
 
 		case 2 :{
 			//dobimo dominantne frekvence
-			retVal = arr*arr*arr;
+			retVal = arr*arr;
 		}
 		break;
 
@@ -270,7 +276,8 @@ ComplexArr getZeros(size_t length){
 
 
 ComplexArr normalise(ComplexArr arr){
-#undef max //nevem tle neki teži
+#undef max()
+//nevem tle neki teži
 	Complex max = arr.max();
 	return (arr / max);
 }
@@ -361,6 +368,8 @@ ComplexArr generateWave(int freq, size_t size){
 	for (int i = 0; i < x.size(); i++) {
 		x[i] = std::sin(x[i]);
 	}
+
+	return x;
 }
 
 
