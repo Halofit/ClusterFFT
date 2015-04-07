@@ -14,6 +14,7 @@
 
 #include "sndfile.h"
 #include "gnuplotCall.h"
+#include "ComplexArr.h"
 
 void initCounter();
 void startCounter();
@@ -21,46 +22,13 @@ double getCounter();
 
 void mpiWaitForData();
 
-typedef std::complex<double> Complex;
-typedef std::valarray<Complex> ComplexArr;
-
-bool operator <(const Complex &a, const Complex &b){
-	return a.real() < b.real();
-}
 
 bool isPow2(size_t x);
 size_t getLog2(size_t x);
-
-ComplexArr modifyArray(ComplexArr arr, int action);
-ComplexArr recurFFT(ComplexArr arr);
-ComplexArr recurIFFT(ComplexArr arr);
-
-
-ComplexArr normalise(ComplexArr arr);
-float* writeToFloat(ComplexArr arr);
-ComplexArr getZeros(size_t length);
-ComplexArr getRange(int start, size_t length, int stride);
-void printArr(ComplexArr arr);
-void printArr(ComplexArr arr, int start, int ammount);
 void printArr(float* arr, int start, int ammount);
 
 
-
-struct mpiGlobals {
-	int procs;
-	int procId;
-} mpi;
-
-
-
-
 int main(int argc, char* argv[]){
-	if(true){
-		drawWithGnuplot();
-		exit(0);
-	}
-
-
 	float* buf;
 	SNDFILE *sf;
 	SF_INFO info;
@@ -83,10 +51,13 @@ int main(int argc, char* argv[]){
 
 	/* Allocate space for the data to be read, then read it. */
 	buf = (float *) malloc(num_items*sizeof(float));
+
 	size_t num = sf_read_float(sf, buf, num_items);
 	sf_close(sf);
 	printf("Read %d items\n",num);
-
+	
+	drawFloats(buf, num_items);
+	
 	ComplexArr x;
 	size_t totalLen = num_items;
 	if(!isPow2(num_items)){
@@ -110,7 +81,7 @@ int main(int argc, char* argv[]){
 	//startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	ComplexArr xInter = modifyArray(x1, 2);
+	ComplexArr xInter = getDominantFrequencies(x1);
 	ComplexArr x2 = recurIFFT(xInter);
 
 	//double time = getCounter();
@@ -167,147 +138,7 @@ void mpiWaitForData(){
 }
 */
 
-ComplexArr modifyArray(ComplexArr arr, int action){
-	ComplexArr retVal;
-	
-	switch(action){
-		case 1 :{
-			int n = 1000;
-			retVal = getZeros(arr.size());
-			ComplexArr inter = arr[std::slice(0, arr.size()-n, 1)];
-			retVal[std::slice(n, arr.size()-n, 1)] = inter;
-		}
-		break;
 
-		case 2 :{
-			//dobimo dominantne frekvence
-			retVal = arr*arr;
-		}
-		break;
-
-		case 3 :{
-			puts("Unimplemented!");
-			exit(0);
-		}
-		break;
-
-		case 0:
-		default:
-			retVal = arr;
-	}
-
-	return retVal;
-}
-
-
-ComplexArr recurFFT(ComplexArr arr){
-	size_t n = arr.size();
-	if (n == 1){
-		return arr;
-	}else{
-		size_t m = n/2;
-		ComplexArr yTop = recurFFT(arr[std::slice(0,m,2)]);
-		ComplexArr yBottom = recurFFT(arr[std::slice(1,m,2)]);
-
-		Complex root = std::exp(-2 * M_PI * Complex(0.f,1.f) / double(n));
-		
-		
-		ComplexArr range = getRange(0, m, 1);
-		//ComplexArr d = std::pow(root, range);
-		for (size_t i = 0; i < m; i++) {
-			range[i] = std::pow(root, range[i]);
-		}
-		ComplexArr d = range;
-
-		ComplexArr z = d*yBottom;
-		ComplexArr y(n);
-		y[std::slice(0,m,1)] = yTop+z;
-		y[std::slice(m,m,1)] = yTop-z;
-		return y;
-	}
-}
-
-ComplexArr recurIFFT(ComplexArr arr){
-	size_t n = arr.size();
-	if (n == 1){
-		return arr;
-	}else{
-		size_t m = n/2;
-		ComplexArr yTop = recurIFFT(arr[std::slice(0,m,2)]);
-		ComplexArr yBottom = recurIFFT(arr[std::slice(1,m,2)]);
-
-		Complex root = std::exp(-2 * M_PI * Complex(0.f,1.f) / double(n));
-		root = Complex(1.,0.) / root;
-
-		ComplexArr range = getRange(0, m, 1);
-
-		//ComplexArr d = std::pow(root, range);
-		for (size_t i = 0; i < m; i++) {
-			range[i] = std::pow(root, range[i]);
-		}
-		ComplexArr d = range;
-
-		ComplexArr z = d*yBottom;
-		ComplexArr y(n);
-		y[std::slice(0,m,1)] = yTop+z;
-		y[std::slice(m,m,1)] = yTop-z;
-		return y;
-	}
-}
-
-
-ComplexArr getRange(int start, size_t length, int stride){
-	ComplexArr r(length);
-	int val = start;
-	for (size_t i = 0; i < length; i++) {
-		r[i] = val;
-		val += stride;
-	}
-	return r;
-}
-
-ComplexArr getZeros(size_t length){
-	ComplexArr r(length);
-	for (size_t i = 0; i < length; i++) {
-		r[i] = 0;
-	}
-	return r;
-}
-
-
-ComplexArr normalise(ComplexArr arr){
-#undef max()
-//nevem tle neki teži
-	Complex max = arr.max();
-	return (arr / max);
-}
-
-float* writeToFloat(ComplexArr arr){
-	float* retVal = (float*) malloc(sizeof(float)*arr.size());
-
-	for (size_t i = 0; i < arr.size(); i++) {
-		retVal[i] = (float)arr[i].real();
-	}
-
-	return retVal;
-}
-
-
-void printArr(ComplexArr arr){
-	for (int i = 0; i < arr.size(); i++) {
-		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
-	}
-	
-	printf("\n\n");
-}
-
-void printArr(ComplexArr arr, int start, int ammount){
-	for (int i = start; i < start+ammount && i<arr.size(); i++) {
-		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
-	}
-	
-	printf("\n\n");
-}
 
 void printArr(float* arr, int start, int ammount){
 	for (int i = start; i < start+ammount; i++) {
@@ -357,19 +188,6 @@ size_t getLog2(size_t x){
 		case 1073741824:        return 30;
 		default : return 0;
 	}
-}
-
-ComplexArr generateWave(int freq, size_t size){
-	ComplexArr x = getRange(0, size, 1);
-	
-	x = Complex(2.0*M_PI*freq,0.)*x;
-
-	//x = std::sin(x);
-	for (int i = 0; i < x.size(); i++) {
-		x[i] = std::sin(x[i]);
-	}
-
-	return x;
 }
 
 

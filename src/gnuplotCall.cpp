@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "gnuplotCall.h"
+
+//Coped from the web, it claims:
 // Tested on:
 // 1. Visual Studio 2012 on Windows
 // 2. Mingw gcc 4.7.1 on Windows
@@ -20,8 +23,7 @@
 #endif
 
 
-
-int drawWithGnuplot() {
+int testGnuplot() {
 	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
     if (pipe != NULL) {
@@ -40,3 +42,31 @@ int drawWithGnuplot() {
 	return 0;
 }
 
+
+void drawFloats(float* arr, int len){
+	
+	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+
+    if (pipe != NULL) {
+        fprintf(pipe, "set term wx\n");
+		fprintf(pipe, "set title 'Hello floats' \n");
+		fprintf(pipe, "set style histogram \n");
+		fprintf(pipe, "plot [t=0:%d] [-1:1] '-' with histograms\n", len);
+
+		for (size_t i = 0; i < len; i++) {
+			fprintf(pipe, "%f\n", arr[i]);
+		}
+
+        fprintf(pipe, "%s\n", "e");
+        fflush(pipe);
+
+		PCLOSE(pipe);
+	}else{
+	    printf("Could not open pipe\n"); 
+	}
+}
+
+
+void drawComplexArr(ComplexArr arr){
+
+}

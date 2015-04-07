@@ -1,3 +1,7 @@
 #pragma once
 
-int drawWithGnuplot();
+#include "ComplexArr.h"
+
+int testGnuplot();
+void drawFloats(float* arr, int len);
+void drawComplexArr(ComplexArr arr);
