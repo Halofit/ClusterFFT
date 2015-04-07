@@ -29,7 +29,7 @@ void printArr(float* arr, int start, int ammount);
 
 
 int main(int argc, char* argv[]){
-	float* buf;
+	//float* buf;
 	SNDFILE *sf;
 	SF_INFO info;
 		
@@ -50,9 +50,8 @@ int main(int argc, char* argv[]){
 	printf("num_items=%d\n",num_items);
 
 	/* Allocate space for the data to be read, then read it. */
-	buf = (float *) malloc(num_items*sizeof(float));
-
-	size_t num = sf_read_float(sf, buf, num_items);
+	std::vector<float> buf(num_items);
+	size_t num = sf_read_float(sf, &(buf[0]), num_items);
 	sf_close(sf);
 	printf("Read %d items\n",num);
 	
@@ -108,17 +107,13 @@ int main(int argc, char* argv[]){
 
 
 	x2 = normalise(x2);
-	float* outBuf = writeToFloat(x2);
+	std::vector<float> outBuf = writeRealsToFloat(x2);
 	
 	size_t outSize = x2.size();
-	if (sf_write_float (outSF, outBuf, num_items) != 1) {
+	if (sf_write_float (outSF, &(outBuf[0]), num_items) != 1) {
 		puts (sf_strerror (outSF));
 	}
-
 	sf_close(outSF);
-		
-	free(buf);
-	free(outBuf);
 }
 
 void mpiWaitForData(){}

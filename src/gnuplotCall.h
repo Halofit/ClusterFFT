@@ -3,5 +3,5 @@
 #include "ComplexArr.h"
 
 int testGnuplot();
-void drawFloats(float* arr, int len);
+void drawFloats(std::vector<float> arr, size_t len);
 void drawComplexArr(ComplexArr arr);

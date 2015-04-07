@@ -43,7 +43,7 @@ int testGnuplot() {
 }
 
 
-void drawFloats(float* arr, int len){
+void drawFloats(std::vector<float> arr, size_t len){
 	
 	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
