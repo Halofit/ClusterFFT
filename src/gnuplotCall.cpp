@@ -48,10 +48,18 @@ namespace plot{
 		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
 		if (pipe != NULL) {
+
+			float max = 0.f;
+			float min = 0.f;
+			for (auto& el : arr) {
+				if		(el > max) max = el;
+				else if (el < min) min = el;
+			}
+
 			fprintf(pipe, "set term wx\n");
 			fprintf(pipe, "set title 'Hello floats' \n");
 			fprintf(pipe, "set style histogram \n");
-			fprintf(pipe, "plot [t=0:%d] [-1:1] '-' with histograms\n", len);
+			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", arr.size(), min, max);
 
 			for (auto& el : arr) {
 				fprintf(pipe, "%f\n", el);
