@@ -44,25 +44,26 @@ namespace plot{
 	}
 
 
-	void drawHistogram(std::vector<float> arr){	
+	void drawHistogram(std::vector<float> arr, size_t start, size_t len){
 		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
 		if (pipe != NULL) {
+			size_t end = start + len;
 
 			float max = 0.f;
 			float min = 0.f;
-			for (auto& el : arr) {
-				if		(el > max) max = el;
-				else if (el < min) min = el;
+			for (int i = start; (i < end) && (arr.size()); i++) {
+				if		(arr[i] > max) max = arr[i];
+				else if (arr[i] < min) min = arr[i];
 			}
 
 			fprintf(pipe, "set term wx\n");
 			fprintf(pipe, "set title 'Hello floats' \n");
 			fprintf(pipe, "set style histogram \n");
-			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", arr.size(), min, max);
+			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", len, min, max);
 
-			for (auto& el : arr) {
-				fprintf(pipe, "%f\n", el);
+			for (int i = start; (i < end) && (arr.size()); i++) {
+				fprintf(pipe, "%f\n", arr[i]);
 			}
 
 			fprintf(pipe, "%s\n", "e");
@@ -72,5 +73,10 @@ namespace plot{
 		}else{
 			printf("Could not open pipe\n"); 
 		}
+	}
+
+
+	void drawHistogram(std::vector<float> arr){	
+		drawHistogram(arr, 0, arr.size());
 	}
 }

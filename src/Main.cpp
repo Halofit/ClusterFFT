@@ -16,55 +16,40 @@
 #include "gnuplotCall.h"
 #include "ComplexArr.h"
 
+
+#ifdef _DEBUG
+	#define LOG(...) do{printf( __VA_ARGS__); fflush(NULL);}while(0)
+#else
+	#define LOG(...)
+#endif
+
 void initCounter();
 void startCounter();
 double getCounter();
-
-void mpiWaitForData();
-
 
 bool isPow2(size_t x);
 size_t getLog2(size_t x);
 void printArr(float* arr, int start, int ammount);
 
+struct WavData{
+	SF_INFO info;
+	std::vector<float> data;
+};
+
+WavData loadWavData(char* file);
+bool saveWavData(char* file, WavData w);
+
 
 int main(int argc, char* argv[]){
-	SNDFILE* sf;
-	SF_INFO info;
-		
-
-	puts("Openeing WAV file:\n");
-	info.format = 0;
-	sf = sf_open("mono.wav", SFM_READ, &info);
-	if (sf == NULL){
-		puts("Failed to open the file.\n");
-		exit(-1);
-	}
-	puts("File opened\n");
-
-
-	size_t num_items = info.frames*info.channels;
-
-	/* Print some of the info, and figure out how much data to read. */
-	printf("Frames = %d\n", info.frames);
-	printf("Sample rate = %dHz\n", info.samplerate);
-	printf("Channels = %d\n", info.channels);
-	printf("Total number of samples = %d\n",num_items);
-	printf("Number of samples per channel = %d\n",num_items/info.channels);
-
-	/* Allocate space for the data to be read, then read it. */
-	std::vector<float> buf(num_items);
-	size_t num = sf_read_float(sf, &(buf[0]), num_items);
-	sf_close(sf);
-	printf("Read %d items\n",num);
 	
+	WavData w = loadWavData("mono.wav");
 
 	ComplexArr x;
-	size_t totalLen = num_items;
+	size_t totalLen = w.data.size();
 	//Guarantee that number of elements is a power of 2
-	if(!isPow2(num_items)){
+	if(!isPow2(w.data.size())){
 		size_t i;
-		for (i = 1; num_items>i; i*=2);
+		for (i = 1; w.data.size()>i; i*=2);
 		totalLen = i;
 	}
 	printf("Length of array: %u\n", totalLen);
@@ -73,8 +58,8 @@ int main(int argc, char* argv[]){
 	//Pad with zeroes
 	x = ComplexArr(totalLen);
 	for (size_t i = 0; i < totalLen; i++) {
-		if(i < num_items){
-			x[i] = Complex(buf[i], 0.f);
+		if(i < w.data.size()){
+			x[i] = Complex(w.data[i], 0.f);
 		}else{
 			x[i] = Complex(0.f, 0.f);
 		}
@@ -84,7 +69,7 @@ int main(int argc, char* argv[]){
 	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	plot::drawHistogram(getAmplitude(x1));
+	plot::drawHistogram(getAmplitude(x1), x1.size()/2, x1.size()/2);
 	x1 = squareArray(x1);
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
@@ -93,35 +78,77 @@ int main(int argc, char* argv[]){
 	printf("Time: %fms\n\n", time);
 
 	
-	puts("Opening file for writing output\n");
-	SNDFILE *outSF = nullptr;
+	//Prepare data for output
+	WavData wOut;
+	wOut.info = w.info;
+	wOut.data = writeRealsToFloat(x2);
+	saveWavData("monoOut.wav", wOut);
+}
+
+
+WavData loadWavData(char* file){
+	WavData w;
+	SNDFILE* sf;
+	
+	printf("Openeing WAV file [%s]:\n", file);
+	w.info.format = 0;
+	sf = sf_open(file, SFM_READ, &(w.info));
+	if (sf == NULL){
+		puts("Failed to open the file.\n");
+		exit(-1);
+	}
+	puts("File opened\n");
+
+
+	size_t num_items = w.info.frames*w.info.channels;
+
+	/* Print some of the info, and figure out how much data to read. */
+	printf("Frames = %d\n", w.info.frames);
+	printf("Sample rate = %dHz\n", w.info.samplerate);
+	printf("Channels = %d\n", w.info.channels);
+	printf("Total number of samples = %d\n", num_items);
+	printf("Number of samples per channel = %d\n",num_items/w.info.channels);
+
+	/* Allocate space for the data to be read, then read it. */
+	w.data = std::vector<float>(num_items);
+	size_t num = sf_read_float(sf, &(w.data[0]), num_items);
+	sf_close(sf);
+	printf("Read %d items\n",num);
+
+	return w;
+}
+
+
+bool saveWavData(char* file, WavData w){
+	printf("Opening file [%s] for writing.\n", file);
+
+	SNDFILE *sf = nullptr;
 	SF_INFO oi;
 	oi.channels = 1;
-	oi.format = info.format;
-	oi.frames = info.frames;
-	oi.samplerate = info.samplerate;
-	oi.sections = info.sections;
-	oi.seekable = info.seekable;
+	oi.format = w.info.format;
+	oi.frames = w.info.frames;
+	oi.samplerate = w.info.samplerate;
+	oi.sections = w.info.sections;
+	oi.seekable = w.info.seekable;
 		
 	// Open the WAV file.
-	outSF = sf_open("monoOut.wav", SFM_WRITE, &oi);
+	sf = sf_open(file, SFM_WRITE, &oi);
 
 	if (sf == NULL){
 		printf("Failed to open the file.\n");
-		exit(-1);
-	}else{
-		//Prepare data for output
-		std::vector<float> outBuf = writeRealsToFloat(x2);
-	
-		//Write the file:
-		size_t outSize = x2.size();
-		sf_count_t err = sf_write_float (outSF, &(outBuf[0]), num_items);
-		if (err != 1) {
-			puts (sf_strerror (outSF));
-		}
-		sf_close(outSF);
+		return false;
 	}
+
+	//Write the file:
+	sf_count_t err = sf_write_float (sf, &(w.data[0]), w.data.size());
+	if (err != 1) {
+		puts (sf_strerror (sf));
+	}
+	sf_close(sf);
+
+	return true;
 }
+
 
 void mpiWaitForData(){}
 
