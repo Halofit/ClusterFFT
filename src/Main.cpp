@@ -29,7 +29,6 @@ void printArr(float* arr, int start, int ammount);
 
 
 int main(int argc, char* argv[]){
-	//float* buf;
 	SNDFILE *sf;
 	SF_INFO info;
 		
@@ -55,7 +54,7 @@ int main(int argc, char* argv[]){
 	sf_close(sf);
 	printf("Read %d items\n",num);
 	
-	drawFloats(buf, num_items);
+	drawHistogram(buf, num_items);
 	
 	ComplexArr x;
 	size_t totalLen = num_items;
@@ -134,6 +133,25 @@ void mpiWaitForData(){
 */
 
 
+//Yes, I'm taking the piss right now
+template <class T>
+void printContainer(T arr){
+	for (auto& el : arr) {
+		std::cout << el << " ";
+	}
+}
+
+//Furter piss-taking
+template <class A>
+std::valarray<A> getTemplateRange(A start, size_t length, A stride){
+	std::valarray<A> r(length);
+	A val = start;
+	for (size_t i = 0; i < length; i++) {
+		r[i] = val;
+		val += stride;
+	}
+	return r;
+}
 
 void printArr(float* arr, int start, int ammount){
 	for (int i = start; i < start+ammount; i++) {
