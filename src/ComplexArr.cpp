@@ -1,11 +1,12 @@
 
-#include "ComplexArr.h"
+
 
 #define _USE_MATH_DEFINES
+#include <cmath>
+#include "ComplexArr.h"
 
 #include <vector>
 
-#include "math.h"
 
 
 
@@ -14,7 +15,7 @@ bool operator <(const Complex &a, const Complex &b){
 }
 
 
-ComplexArr getDominantFrequencies(ComplexArr arr){
+ComplexArr squareArray(ComplexArr arr){
 	ComplexArr retVal;
 	retVal = arr*arr;
 	return retVal;

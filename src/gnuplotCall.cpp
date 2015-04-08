@@ -22,46 +22,47 @@
 	#define PCLOSE pclose
 #endif
 
+namespace plot{
 
-int testGnuplot() {
-	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+	int testGnuplot() {
+		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
-    if (pipe != NULL) {
-        fprintf(pipe, "set term wx\n");         // set the terminal
-        fprintf(pipe, "plot '-' with lines\n"); // plot type
-        for(int i = 0; i < 10; i++)             // loop over the data [0,...,9]
-            fprintf(pipe, "%d\n", i);           // data terminated with \n
-        fprintf(pipe, "%s\n", "e");             // termination character
-        fflush(pipe);                           // flush the pipe
+		if (pipe != NULL) {
+			fprintf(pipe, "set term wx\n");         // set the terminal
+			fprintf(pipe, "plot '-' with lines\n"); // plot type
+			for(int i = 0; i < 10; i++)             // loop over the data [0,...,9]
+				fprintf(pipe, "%d\n", i);           // data terminated with \n
+			fprintf(pipe, "%s\n", "e");             // termination character
+			fflush(pipe);                           // flush the pipe
 
-		PCLOSE(pipe);
-	}else{
-	    printf("Could not open pipe\n"); 
-	}
-    
-	return 0;
-}
-
-
-void drawHistogram(std::vector<float> arr, size_t len){	
-	FILE *pipe = POPEN(GNUPLOT_NAME, "w");
-
-    if (pipe != NULL) {
-        fprintf(pipe, "set term wx\n");
-		fprintf(pipe, "set title 'Hello floats' \n");
-		fprintf(pipe, "set style histogram \n");
-		fprintf(pipe, "plot [t=0:%d] [-1:1] '-' with histograms\n", len);
-
-		for (size_t i = 0; i < len; i++) {
-			fprintf(pipe, "%f\n", arr[i]);
+			PCLOSE(pipe);
+		}else{
+			printf("Could not open pipe\n"); 
 		}
+    
+		return 0;
+	}
 
-        fprintf(pipe, "%s\n", "e");
-        fflush(pipe);
 
-		PCLOSE(pipe);
-	}else{
-	    printf("Could not open pipe\n"); 
+	void drawHistogram(std::vector<float> arr){	
+		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+
+		if (pipe != NULL) {
+			fprintf(pipe, "set term wx\n");
+			fprintf(pipe, "set title 'Hello floats' \n");
+			fprintf(pipe, "set style histogram \n");
+			fprintf(pipe, "plot [t=0:%d] [-1:1] '-' with histograms\n", len);
+
+			for (auto& el : arr) {
+				fprintf(pipe, "%f\n", el);
+			}
+
+			fprintf(pipe, "%s\n", "e");
+			fflush(pipe);
+
+			PCLOSE(pipe);
+		}else{
+			printf("Could not open pipe\n"); 
+		}
 	}
 }
-

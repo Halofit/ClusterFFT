@@ -12,7 +12,7 @@ bool operator <(const Complex &a, const Complex &b);
 ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
 
-ComplexArr getDominantFrequencies(ComplexArr arr);
+ComplexArr squareArray(ComplexArr arr);
 ComplexArr shiftArray(ComplexArr arr);
 ComplexArr normalise(ComplexArr arr);
 

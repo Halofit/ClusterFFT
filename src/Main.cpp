@@ -1,16 +1,16 @@
 
 #define _USE_MATH_DEFINES
 
+#include <iostream>
+#include <cmath>
+#include <valarray>
+#include <complex>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 
 #include <mpi.h>
-
-#include <iostream>
-#include <cmath>
-#include <valarray>
-#include <complex>
 
 #include "sndfile.h"
 #include "gnuplotCall.h"
@@ -29,24 +29,28 @@ void printArr(float* arr, int start, int ammount);
 
 
 int main(int argc, char* argv[]){
-	SNDFILE *sf;
+	SNDFILE* sf;
 	SF_INFO info;
 		
-	/* Open the WAV file. */
+
+	puts("Openeing WAV file:\n");
 	info.format = 0;
 	sf = sf_open("mono.wav", SFM_READ, &info);
 	if (sf == NULL){
-		printf("Failed to open the file.\n");
+		puts("Failed to open the file.\n");
 		exit(-1);
 	}
+	puts("File opened\n");
+
 
 	size_t num_items = info.frames*info.channels;
 
 	/* Print some of the info, and figure out how much data to read. */
-	printf("frames=%d\n", info.frames);
-	printf("samplerate=%d\n", info.samplerate);
-	printf("channels=%d\n", info.channels);
-	printf("num_items=%d\n",num_items);
+	printf("Frames = %d\n", info.frames);
+	printf("Sample rate = %dHz\n", info.samplerate);
+	printf("Channels = %d\n", info.channels);
+	printf("Total number of samples = %d\n",num_items);
+	printf("Number of samples per channel = %d\n",num_items/info.channels);
 
 	/* Allocate space for the data to be read, then read it. */
 	std::vector<float> buf(num_items);
@@ -54,18 +58,19 @@ int main(int argc, char* argv[]){
 	sf_close(sf);
 	printf("Read %d items\n",num);
 	
-	drawHistogram(buf, num_items);
-	
+
 	ComplexArr x;
 	size_t totalLen = num_items;
+	//Guarantee that number of elements is a power of 2
 	if(!isPow2(num_items)){
 		size_t i;
 		for (i = 1; num_items>i; i*=2);
 		totalLen = i;
-		printf("%u %u\n", totalLen, num_items);
-				
 	}
+	printf("Length of array: %u\n", totalLen);
 
+
+	//Pad with zeroes
 	x = ComplexArr(totalLen);
 	for (size_t i = 0; i < totalLen; i++) {
 		if(i < num_items){
@@ -75,17 +80,20 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	//initCounter();
-	//startCounter();
+	initCounter();
+	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	ComplexArr xInter = getDominantFrequencies(x1);
-	ComplexArr x2 = recurIFFT(xInter);
+	plot::drawHistogram(getAmplitude(x1));
+	x1 = squareArray(x1);
+	ComplexArr x2 = recurIFFT(x1);
+	x2 = normalise(x2);
 
-	//double time = getCounter();
-	//printf("Time: %fms\n", time);
+	double time = getCounter();
+	printf("Time: %fms\n\n", time);
 
-
+	
+	puts("Opening file for writing output\n");
 	SNDFILE *outSF = nullptr;
 	SF_INFO oi;
 	oi.channels = 1;
@@ -94,25 +102,25 @@ int main(int argc, char* argv[]){
 	oi.samplerate = info.samplerate;
 	oi.sections = info.sections;
 	oi.seekable = info.seekable;
-
-	
-	/* Open the WAV file. */
+		
+	// Open the WAV file.
 	outSF = sf_open("monoOut.wav", SFM_WRITE, &oi);
 
 	if (sf == NULL){
 		printf("Failed to open the file.\n");
 		exit(-1);
-	}
-
-
-	x2 = normalise(x2);
-	std::vector<float> outBuf = writeRealsToFloat(x2);
+	}else{
+		//Prepare data for output
+		std::vector<float> outBuf = writeRealsToFloat(x2);
 	
-	size_t outSize = x2.size();
-	if (sf_write_float (outSF, &(outBuf[0]), num_items) != 1) {
-		puts (sf_strerror (outSF));
+		//Write the file:
+		size_t outSize = x2.size();
+		sf_count_t err = sf_write_float (outSF, &(outBuf[0]), num_items);
+		if (err != 1) {
+			puts (sf_strerror (outSF));
+		}
+		sf_close(outSF);
 	}
-	sf_close(outSF);
 }
 
 void mpiWaitForData(){}
