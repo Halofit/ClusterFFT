@@ -18,10 +18,12 @@ ComplexArr normalise(ComplexArr arr);
 
 std::vector<float> getAmplitude(ComplexArr arr);
 std::vector<float> getPhase(ComplexArr arr);
+std::vector<float> getPowerSpectrum(ComplexArr arr);
 
 ComplexArr getZeros(size_t length);
-ComplexArr getRange(int start, size_t length, int stride);
+ComplexArr getRange(float start, size_t length, float stride);
+ComplexArr getWave(float freq, size_t size, float sampleRate);
 
-std::vector<float> writeRealsToFloat(ComplexArr arr);
+std::vector<float> writeComplexToFloat(ComplexArr arr);
 void printArr(ComplexArr arr);
 void printArr(ComplexArr arr, int start, int ammount);

@@ -39,6 +39,11 @@ struct WavData{
 WavData loadWavData(char* file);
 bool saveWavData(char* file, WavData w);
 
+/* // user-defined literal for hertz. Doesn't work
+constexpr float operator"" _Hz (float hertz){
+    return 1/hertz;
+}*/
+
 
 int main(int argc, char* argv[]){
 	
@@ -69,7 +74,7 @@ int main(int argc, char* argv[]){
 	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	plot::drawHistogram(getAmplitude(x1), x1.size()/2, x1.size()/2);
+	plot::drawHistogram(getAmplitude(x1), 0, x1.size()/2);
 	x1 = squareArray(x1);
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
@@ -81,7 +86,7 @@ int main(int argc, char* argv[]){
 	//Prepare data for output
 	WavData wOut;
 	wOut.info = w.info;
-	wOut.data = writeRealsToFloat(x2);
+	wOut.data = writeComplexToFloat(x2);
 	saveWavData("monoOut.wav", wOut);
 }
 

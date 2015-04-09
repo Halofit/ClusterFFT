@@ -24,7 +24,7 @@
 
 namespace plot{
 
-	int testGnuplot() {
+	void testGnuplot() {
 		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
 
 		if (pipe != NULL) {
@@ -39,8 +39,6 @@ namespace plot{
 		}else{
 			printf("Could not open pipe\n"); 
 		}
-    
-		return 0;
 	}
 
 
@@ -52,7 +50,7 @@ namespace plot{
 
 			float max = 0.f;
 			float min = 0.f;
-			for (int i = start; (i < end) && (arr.size()); i++) {
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
 				if		(arr[i] > max) max = arr[i];
 				else if (arr[i] < min) min = arr[i];
 			}
@@ -62,7 +60,7 @@ namespace plot{
 			fprintf(pipe, "set style histogram \n");
 			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", len, min, max);
 
-			for (int i = start; (i < end) && (arr.size()); i++) {
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
 				fprintf(pipe, "%f\n", arr[i]);
 			}
 
@@ -78,5 +76,42 @@ namespace plot{
 
 	void drawHistogram(std::vector<float> arr){	
 		drawHistogram(arr, 0, arr.size());
+	}
+
+
+	void drawLine(std::vector<float> arr, size_t start, size_t len){
+		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+
+		if (pipe != NULL) {
+			size_t end = start + len;
+
+			float max = 0.f;
+			float min = 0.f;
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
+				if		(arr[i] > max) max = arr[i];
+				else if (arr[i] < min) min = arr[i];
+			}
+
+			fprintf(pipe, "set term wx\n");
+			fprintf(pipe, "set title 'Hello floats' \n");
+			fprintf(pipe, "set style line \n");
+			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", len, min, max);
+
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
+				fprintf(pipe, "%f\n", arr[i]);
+			}
+
+			fprintf(pipe, "%s\n", "e");
+			fflush(pipe);
+
+			PCLOSE(pipe);
+		}else{
+			printf("Could not open pipe\n"); 
+		}
+	}
+
+
+	void drawLine(std::vector<float> arr){
+		drawLine(arr, 0, arr.size());
 	}
 }

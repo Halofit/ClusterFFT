@@ -43,7 +43,7 @@ ComplexArr recurFFT(ComplexArr arr){
 		Complex root = std::exp(-2 * float(M_PI) * Complex(0.f,1.f) / float(n));
 		
 		
-		ComplexArr range = getRange(0, m, 1);
+		ComplexArr range = getRange(0.f, m, 1.f);
 		//ComplexArr d = std::pow(root, range);
 		for (size_t i = 0; i < m; i++) {
 			range[i] = std::pow(root, range[i]);
@@ -70,7 +70,7 @@ ComplexArr recurIFFT(ComplexArr arr){
 		Complex root = std::exp(-2 * float(M_PI) * Complex(0.f,1.f) / float(n));
 		root = Complex(1.,0.) / root;
 
-		ComplexArr range = getRange(0, m, 1);
+		ComplexArr range = getRange(0.f, m, 1.f);
 
 		//ComplexArr d = std::pow(root, range);
 		for (size_t i = 0; i < m; i++) {
@@ -108,12 +108,23 @@ std::vector<float> getPhase(ComplexArr arr){
 	return ret;
 }
 
+std::vector<float> getPowerSpectrum(ComplexArr arr){
+	std::vector<float> ret = writeComplexToFloat(std::abs(arr));
+	float nsqrd = float(ret.size()*ret.size());
+	
+	for (size_t i = 0; i < ret.size(); i++) {
+		ret[i] = (ret[i]*ret[i])/nsqrd;
+	}
 
-ComplexArr getRange(int start, size_t length, int stride){
+	return ret;
+}
+
+
+ComplexArr getRange(float start, size_t length, float stride){
 	ComplexArr r(length);
-	int val = start;
+	float val = start;
 	for (size_t i = 0; i < length; i++) {
-		r[i] = Complex(float(val), 0.f);
+		r[i] = Complex(val, 0.f);
 		val += stride;
 	}
 	return r;
@@ -133,7 +144,7 @@ ComplexArr normalise(ComplexArr arr){
 	return (arr / max);
 }
 
-std::vector<float> writeRealsToFloat(ComplexArr arr){
+std::vector<float> writeComplexToFloat(ComplexArr arr){
 	std::vector<float> retVal (arr.size());
 
 	for (size_t i = 0; i < arr.size(); i++) {
@@ -161,8 +172,8 @@ void printArr(ComplexArr arr, int start, int ammount){
 }
 
 
-ComplexArr generateWave(int freq, size_t size){
-	ComplexArr x = getRange(0, size, 1);
+ComplexArr getWave(float freq, size_t size, float sampleRate){
+	ComplexArr x = getRange(0.f, size, sampleRate);
 	
 	x = Complex(2.f*float(M_PI)*freq,0.f)*x;
 
