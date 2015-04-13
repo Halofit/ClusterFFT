@@ -30,6 +30,7 @@ double getCounter();
 bool isPow2(size_t x);
 size_t getLog2(size_t x);
 void printArr(float* arr, int start, int ammount);
+std::vector<float> getFrequencies(size_t size, size_t sampleRate);
 
 struct WavData{
 	SF_INFO info;
@@ -47,7 +48,7 @@ constexpr float operator"" _Hz (float hertz){
 
 int main(int argc, char* argv[]){
 	
-	WavData w = loadWavData("mono.wav");
+	WavData w = loadWavData("kq15.wav");
 
 	ComplexArr x;
 	size_t totalLen = w.data.size();
@@ -74,8 +75,10 @@ int main(int argc, char* argv[]){
 	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	plot::drawHistogram(getAmplitude(x1), 0, x1.size()/2);
-	x1 = squareArray(x1);
+	//plot::drawHistogram(getAmplitude(x1), 0, x1.size()/2);
+	
+	x1 = shiftFreqs(x1, 3.f);
+	x = mirrorArray(x);
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
 
@@ -121,6 +124,20 @@ WavData loadWavData(char* file){
 	printf("Read %d items\n",num);
 
 	return w;
+}
+
+
+std::vector<float> getFrequencies(size_t size, size_t sampleRate){
+	size_t n = size;
+	size_t nHalf = n/2;
+
+	std::vector<float> ret(nHalf);
+	
+	for (size_t i = 0; i < nHalf; i++) {
+		ret[i] = (i*float(sampleRate))/n;
+	}
+
+	return ret;
 }
 
 

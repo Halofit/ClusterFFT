@@ -13,8 +13,10 @@ ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
 
 ComplexArr squareArray(ComplexArr arr);
-ComplexArr shiftArray(ComplexArr arr);
+ComplexArr shiftArray(ComplexArr arr, size_t n);
+ComplexArr shiftFreqs(ComplexArr arr, float constant);
 ComplexArr normalise(ComplexArr arr);
+ComplexArr mirrorArray(ComplexArr arr);
 
 std::vector<float> getAmplitude(ComplexArr arr);
 std::vector<float> getPhase(ComplexArr arr);

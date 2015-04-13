@@ -5,6 +5,8 @@
 #include <cmath>
 #include "ComplexArr.h"
 
+#include <complex>
+#include <valarray>
 #include <vector>
 
 
@@ -22,11 +24,18 @@ ComplexArr squareArray(ComplexArr arr){
 }
 
 
-ComplexArr shiftArray(ComplexArr arr){
-	int n = 1000;
+ComplexArr shiftArray(ComplexArr arr, size_t n){
 	ComplexArr retVal = getZeros(arr.size());
 	ComplexArr inter = arr[std::slice(0, arr.size()-n, 1)];
 	retVal[std::slice(n, arr.size()-n, 1)] = inter;
+	return retVal;
+}
+
+ComplexArr shiftFreqs(ComplexArr arr, float constant){
+	ComplexArr retVal = getZeros(arr.size());
+	for (size_t i = 0; i < (arr.size()/2); i++) {
+		retVal[i] = arr[size_t(i/constant)];
+	}
 	return retVal;
 }
 
@@ -183,4 +192,14 @@ ComplexArr getWave(float freq, size_t size, float sampleRate){
 	}
 
 	return x;
+}
+
+#include <algorithm>
+
+ComplexArr mirrorArray(ComplexArr arr){
+	ComplexArr lower = arr[std::slice(0, arr.size()/2, 1)];
+	std::reverse(begin(lower), end(lower));
+
+	arr[std::slice(arr.size()/2, arr.size()/2, 1)] = lower;
+	return arr;
 }

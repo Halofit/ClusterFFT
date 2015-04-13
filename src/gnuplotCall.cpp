@@ -58,7 +58,68 @@ namespace plot{
 			fprintf(pipe, "set term wx\n");
 			fprintf(pipe, "set title 'Hello floats' \n");
 			fprintf(pipe, "set style histogram \n");
+			fprintf(pipe, "set xrange[0:%d]\n", arr.size()/2);
 			fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", len, min, max);
+
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
+				fprintf(pipe, "%f\n", arr[i]);
+			}
+
+			fprintf(pipe, "%s\n", "e");
+			fflush(pipe);
+
+			PCLOSE(pipe);
+		}else{
+			printf("Could not open pipe\n"); 
+		}
+	}
+
+	void drawHistogram(std::vector<float> arr, size_t start, size_t len, size_t samplingRateInHz){
+		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+
+		if (pipe != NULL) {
+			size_t end = start + len;
+
+
+			fprintf(pipe, "set term wx\n");
+			fprintf(pipe, "set title 'Hello floats' \n");
+			fprintf(pipe, "set style histogram \n");
+			fprintf(pipe, "plot [t=0:%u] '-' with histograms\n", samplingRateInHz);
+
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
+				fprintf(pipe, "%f\n", arr[i]);
+			}
+
+			fprintf(pipe, "%s\n", "e");
+			fflush(pipe);
+
+			PCLOSE(pipe);
+		}else{
+			printf("Could not open pipe\n"); 
+		}
+	}
+
+
+	void drawHistogram(std::vector<float> arr, std::vector<float> freqs, size_t start, size_t len){
+		FILE *pipe = POPEN(GNUPLOT_NAME, "w");
+
+		if (pipe != NULL) {
+			size_t end = start + len;
+
+			float max = 0.f;
+			float min = 0.f;
+			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
+				if		(arr[i] > max) max = arr[i];
+				else if (arr[i] < min) min = arr[i];
+			}
+
+			fprintf(pipe, "set term wx\n");
+			fprintf(pipe, "set title 'Hello floats' \n");
+			fprintf(pipe, "set xrange[0:%f]\n", freqs.at(freqs.size()-1));
+			fprintf(pipe, "set yrange[%f:%f]\n", min, max);
+			fprintf(pipe, "set style histogram \n");
+			//fprintf(pipe, "plot [t=0:%u] [%f:%f] '-' with histograms\n", len, min, max);
+			fprintf(pipe, "plot [t=0:%u]  '-' with histograms\n", len);
 
 			for (size_t i = start; (i < end) && (i < arr.size()); i++) {
 				fprintf(pipe, "%f\n", arr[i]);
