@@ -1,12 +1,12 @@
 #pragma once
 
 #include <complex>
-bool operator <(const Complex &a, const Complex &b);
+typedef std::complex<float> Complex;
+bool operator<(const Complex &a, const Complex &b);
 
 #include <valarray>
 #include <vector>
 
-typedef std::complex<float> Complex;
 
 
 typedef std::valarray<Complex> ComplexArr;

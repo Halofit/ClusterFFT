@@ -8,6 +8,7 @@
 #include <complex>
 #include <valarray>
 #include <vector>
+#include <algorithm>
 
 
 bool operator <(const Complex &a, const Complex &b){
@@ -162,7 +163,7 @@ std::vector<float> writeComplexToFloat(ComplexArr arr){
 
 
 void printArr(ComplexArr arr){
-	for (int i = 0; i < arr.size(); i++) {
+	for (size_t i = 0; i < arr.size(); i++) {
 		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
 	}
 	
@@ -170,7 +171,7 @@ void printArr(ComplexArr arr){
 }
 
 void printArr(ComplexArr arr, int start, int ammount){
-	for (int i = start; i < start+ammount && i<arr.size(); i++) {
+	for (size_t i = start; i < (size_t)start+ammount && i<arr.size(); i++) {
 		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
 	}
 	
@@ -184,14 +185,13 @@ ComplexArr getWave(float freq, size_t size, float sampleRate){
 	x = Complex(2.f*float(M_PI)*freq,0.f)*x;
 
 	//x = std::sin(x);
-	for (int i = 0; i < x.size(); i++) {
+	for (size_t i = 0; i < x.size(); i++) {
 		x[i] = std::sin(x[i]);
 	}
 
 	return x;
 }
 
-#include <algorithm>
 
 ComplexArr mirrorArray(ComplexArr arr){
 	ComplexArr lower = arr[std::slice(0, arr.size()/2, 1)];

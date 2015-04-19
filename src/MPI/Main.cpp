@@ -14,8 +14,11 @@
 #include <stdint.h>
 
 #include <mpi.h>
-
-#include "sndfile.h"
+#ifdef _WIN32
+	#include "sndfile.h"
+#else
+	#include <sndfile.h>
+#endif
 #include "ComplexArr.h"
 
 //#define LOGGING
