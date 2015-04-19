@@ -1,24 +1,25 @@
+//Normal version
 
 #define _USE_MATH_DEFINES
 
 #include <iostream>
+#include <string>
 #include <cmath>
 #include <valarray>
 #include <complex>
+#include <map>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 
-#include <mpi.h>
-
 #include "sndfile.h"
 #include "gnuplotCall.h"
 #include "ComplexArr.h"
 
-
-#ifdef _DEBUG
-	#define LOG(...) do{printf( __VA_ARGS__); fflush(NULL);}while(0)
+#define LOGGING
+#ifdef LOGGING
+	#define LOG(...) do{if(mpi.rank == mpi.MASTER){printf( __VA_ARGS__); fflush(NULL);}}while(0)
 #else
 	#define LOG(...)
 #endif
@@ -37,18 +38,76 @@ struct WavData{
 	std::vector<float> data;
 };
 
-WavData loadWavData(char* file);
-bool saveWavData(char* file, WavData w);
+WavData loadWavData(const char* file);
+bool saveWavData(const char* file, WavData w);
 
-/* // user-defined literal for hertz. Doesn't work
+/* // user-defined literal for hertz. Doesn't work on windows
 constexpr float operator"" _Hz (float hertz){
     return 1/hertz;
 }*/
 
+enum class CmdArgs {
+	ARG_FILE_IN, ARG_FILE_OUT, ARG_USE_MPI
+};
+
+const std::map<std::string, CmdArgs> options = 
+{
+	{"-i", CmdArgs::ARG_FILE_IN},
+	{"-o", CmdArgs::ARG_FILE_OUT},
+	{"-mpi", CmdArgs::ARG_USE_MPI},
+};
 
 int main(int argc, char* argv[]){
 	
-	WavData w = loadWavData("kq15.wav");
+	const char* inFile = "kq15.wav";
+	const char* outFile = "out.wav";
+
+	//Get arguments into a vector
+	std::vector<std::string> cargs(argv, argv + argc);
+	
+	for (size_t i = 1; i < cargs.size(); i++) {
+		auto lookUp = options.find(cargs[i]);
+		if(lookUp == options.end()){
+			std::cout << "Unknown command " << cargs[i] << "\n";
+			exit(2);
+		}else{
+			switch(options.at(cargs[i])){
+				case CmdArgs::ARG_FILE_IN :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						std::cout << "Error, -i needs a file\n";
+						exit(1);
+					}
+					else{
+						inFile = cargs[i].c_str();
+					}
+					break;
+				};
+
+				case CmdArgs::ARG_FILE_OUT :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						std::cout << "Error, -o needs a file\n";
+						exit(1);
+					}
+					else{
+						outFile = cargs[i].c_str();
+					}
+					break;
+				};
+
+				case CmdArgs::ARG_USE_MPI :{
+					std::cout << "Mpi not supported. Use the mpi version of the program\n";
+					exit(1);
+				}
+			}
+		}
+	}
+
+	printf("In:\t%s\nOut:\t%s\n", inFile, outFile);
+	
+	WavData w = loadWavData(inFile);;
+	
 
 	ComplexArr x;
 	size_t totalLen = w.data.size();
@@ -58,8 +117,7 @@ int main(int argc, char* argv[]){
 		for (i = 1; w.data.size()>i; i*=2);
 		totalLen = i;
 	}
-	printf("Length of array: %u\n", totalLen);
-
+	
 
 	//Pad with zeroes
 	x = ComplexArr(totalLen);
@@ -75,26 +133,23 @@ int main(int argc, char* argv[]){
 	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
-	//plot::drawHistogram(getAmplitude(x1), 0, x1.size()/2);
-	
-	x1 = shiftFreqs(x1, 3.f);
+	x1 = shiftFreqs(x1, 1.f);
 	x = mirrorArray(x);
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
 
 	double time = getCounter();
 	printf("Time: %fms\n\n", time);
-
 	
 	//Prepare data for output
 	WavData wOut;
 	wOut.info = w.info;
-	wOut.data = writeComplexToFloat(x2);
-	saveWavData("monoOut.wav", wOut);
+	wOut.data = writeComplexToFloat(x2);;
+	saveWavData(outFile, wOut);
 }
 
 
-WavData loadWavData(char* file){
+WavData loadWavData(const char* file){
 	WavData w;
 	SNDFILE* sf;
 	
@@ -119,7 +174,7 @@ WavData loadWavData(char* file){
 
 	/* Allocate space for the data to be read, then read it. */
 	w.data = std::vector<float>(num_items);
-	size_t num = sf_read_float(sf, &(w.data[0]), num_items);
+	size_t num = sf_read_float(sf, w.data.data(), num_items);
 	sf_close(sf);
 	printf("Read %d items\n",num);
 
@@ -127,21 +182,7 @@ WavData loadWavData(char* file){
 }
 
 
-std::vector<float> getFrequencies(size_t size, size_t sampleRate){
-	size_t n = size;
-	size_t nHalf = n/2;
-
-	std::vector<float> ret(nHalf);
-	
-	for (size_t i = 0; i < nHalf; i++) {
-		ret[i] = (i*float(sampleRate))/n;
-	}
-
-	return ret;
-}
-
-
-bool saveWavData(char* file, WavData w){
+bool saveWavData(const char* file, WavData w){
 	printf("Opening file [%s] for writing.\n", file);
 
 	SNDFILE *sf = nullptr;
@@ -162,7 +203,7 @@ bool saveWavData(char* file, WavData w){
 	}
 
 	//Write the file:
-	sf_count_t err = sf_write_float (sf, &(w.data[0]), w.data.size());
+	sf_count_t err = sf_write_float (sf, w.data.data(), w.data.size());
 	if (err != 1) {
 		puts (sf_strerror (sf));
 	}
@@ -190,6 +231,20 @@ void mpiWaitForData(){
 */
 
 
+std::vector<float> getFrequencies(size_t size, size_t sampleRate){
+	size_t n = size;
+	size_t nHalf = n/2;
+
+	std::vector<float> ret(nHalf);
+	
+	for (size_t i = 0; i < nHalf; i++) {
+		ret[i] = (i*float(sampleRate))/n;
+	}
+
+	return ret;
+}
+
+
 //Yes, I'm taking the piss right now
 template <class T>
 void printContainer(T arr){
@@ -199,6 +254,7 @@ void printContainer(T arr){
 }
 
 //Furter piss-taking
+//Gets a range of elements in any type that supports addition
 template <class A>
 std::valarray<A> getTemplateRange(A start, size_t length, A stride){
 	std::valarray<A> r(length);
