@@ -10,12 +10,9 @@
 #include <vector>
 
 
-
-
 bool operator <(const Complex &a, const Complex &b){
 	return a.real() < b.real();
 }
-
 
 ComplexArr squareArray(ComplexArr arr){
 	ComplexArr retVal;
