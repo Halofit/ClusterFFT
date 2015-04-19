@@ -18,6 +18,3 @@ ComplexArr.o: ComplexArr.cpp
 
 clean:
 	rm *.o clusterFFT
-
-
-$(CC) $flags -o $name.out $1
