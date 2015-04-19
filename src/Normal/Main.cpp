@@ -19,7 +19,7 @@
 
 #define LOGGING
 #ifdef LOGGING
-	#define LOG(...) do{if(mpi.rank == mpi.MASTER){printf( __VA_ARGS__); fflush(NULL);}}while(0)
+	#define LOG(...) do{printf( __VA_ARGS__); fflush(NULL);}while(0)
 #else
 	#define LOG(...)
 #endif
@@ -211,24 +211,6 @@ bool saveWavData(const char* file, WavData w){
 
 	return true;
 }
-
-
-void mpiWaitForData(){}
-
-/* MPI garbage zaenkrat leti ven dokler ne zrihtam ostalega
-void mpiWaitForData(){
-	int signal;
-	MPI_Recv(&signal, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-}
-{
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &mpi.procs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &mpi.procId);
-
-	MPI_Finalize();
-}
-*/
 
 
 std::vector<float> getFrequencies(size_t size, size_t sampleRate){
