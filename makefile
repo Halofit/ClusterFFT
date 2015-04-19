@@ -5,10 +5,10 @@ CC=mpiCC
 #Flags to use
 CFLAGS=-O3 -Wall -std=c++1y -lsndfile
 
-all: clusterFFT
+all: clusterFFT.out
 
-clusterFFT: Main.o ComplexArr.o 
-	$(CC) $(CFLAGS) Main.o ComplexArr.o -o clusterFFT
+clusterFFT.out: Main.o ComplexArr.o 
+	$(CC) $(CFLAGS) Main.o ComplexArr.o -o clusterFFT.out
 
 Main.o: src/MPI/Main.cpp
 	$(CC) $(CFLAGS) -c src/MPI/Main.cpp
