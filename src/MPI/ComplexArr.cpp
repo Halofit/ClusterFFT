@@ -10,9 +10,20 @@
 #include <vector>
 #include <algorithm>
 
-
+#ifdef _WIN32
 bool operator <(const Complex &a, const Complex &b){
 	return a.real() < b.real();
+}
+#endif
+
+Complex getLargestElement(ComplexArr arr){
+	Complex retVal;
+	for (auto& el : arr) {
+		if(el.real() > retVal.real()){
+			retVal = el;
+		}
+	}
+	return retVal;
 }
 
 ComplexArr squareArray(ComplexArr arr){
@@ -147,7 +158,7 @@ ComplexArr getZeros(size_t length){
 
 
 ComplexArr normalise(ComplexArr arr){
-	Complex max = arr.max();
+	Complex max = getLargestElement(arr);
 	return (arr / max);
 }
 

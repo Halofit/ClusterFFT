@@ -1,16 +1,15 @@
 #pragma once
 
 #include <complex>
-typedef std::complex<float> Complex;
-bool operator<(const Complex &a, const Complex &b);
-
 #include <valarray>
 #include <vector>
 
-
-
+typedef std::complex<float> Complex;
 typedef std::valarray<Complex> ComplexArr;
 
+#ifdef _WIN32
+bool operator<(const Complex &a, const Complex &b);
+#endif
 
 ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
