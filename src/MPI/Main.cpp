@@ -16,10 +16,9 @@
 #include <mpi.h>
 
 #include "sndfile.h"
-#include "gnuplotCall.h"
 #include "ComplexArr.h"
 
-#define LOGGING
+//#define LOGGING
 #ifdef LOGGING
 	#define LOG(...) do{if(mpi.rank == mpi.MASTER){printf( __VA_ARGS__); fflush(NULL);}}while(0)
 #else
