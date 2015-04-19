@@ -10,11 +10,11 @@ all: clusterFFT
 clusterFFT: Main.o ComplexArr.o 
 	$(CC) $(CFLAGS) Main.o ComplexArr.o -o clusterFFT
 
-Main.o: Main.cpp
-	$(CC) $(CFLAGS) -c Main.cpp
+Main.o: src/MPI/Main.cpp
+	$(CC) $(CFLAGS) -c src/MPI/Main.cpp
 
-ComplexArr.o: ComplexArr.cpp
-	$(CC) $(CFLAGS) -c ComplexArr.cpp
+ComplexArr.o: src/MPI/ComplexArr.cpp
+	$(CC) $(CFLAGS) -c src/MPI/ComplexArr.cpp
 
 clean:
 	rm *.o clusterFFT
