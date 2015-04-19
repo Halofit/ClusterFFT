@@ -101,7 +101,7 @@ std::vector<float> getAmplitude(ComplexArr arr){
 	for (size_t i = 0; i < arr.size(); i++) {
 		float real = arr[i].real();
 		float imag = arr[i].imag();
-		ret[i] = std::sqrtf(real*real + imag*imag);
+		ret[i] = (float)std::sqrt(real*real + imag*imag);
 	}
 	return ret;
 }
@@ -112,7 +112,7 @@ std::vector<float> getPhase(ComplexArr arr){
 	for (size_t i = 0; i < arr.size(); i++) {
 		float real = arr[i].real();
 		float imag = arr[i].imag();
-		ret[i] = std::atan2f(imag, real);
+		ret[i] = (float)std::atan2(imag, real);
 	}
 	return ret;
 }
