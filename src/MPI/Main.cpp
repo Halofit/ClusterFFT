@@ -126,6 +126,9 @@ int main(int argc, char* argv[]){
 		}
 	}
 	
+	initCounter();
+	startCounter();
+
 	WavData w;
 	int* sendcnts = (int*) malloc(sizeof(int)*mpi.size);
 	int* disps = (int*) malloc(sizeof(int)*mpi.size);
@@ -141,6 +144,8 @@ int main(int argc, char* argv[]){
 			disp += sendcnts[i];
 		}
 	}
+
+
 
 	MPI_Bcast(sendcnts, mpi.size, MPI_INT, mpi.MASTER, MPI_COMM_WORLD);
 	
@@ -174,8 +179,6 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	initCounter();
-	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
 	x1 = shiftFreqs(x1, 1.f);
