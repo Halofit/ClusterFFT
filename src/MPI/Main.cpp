@@ -28,6 +28,11 @@
 	#define LOG(...)
 #endif
 
+void exitMPI(int status){
+	MPI_Finalize();
+	exit(status);
+}
+
 void initCounter();
 void startCounter();
 double getCounter();
@@ -84,14 +89,14 @@ int main(int argc, char* argv[]){
 		auto lookUp = options.find(cargs[i]);
 		if(lookUp == options.end()){
 			if(mpi.rank == mpi.MASTER) std::cout << "Unknown command " << cargs[i] << "\n";
-			exit(2);
+			exitMPI(2);
 		}else{
 			switch(options.at(cargs[i])){
 				case CmdArgs::ARG_FILE_IN :{
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -i needs a file\n";
-						exit(1);
+						exitMPI(1);
 					}
 					else{
 						inFile = cargs[i].c_str();
@@ -103,7 +108,7 @@ int main(int argc, char* argv[]){
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -o needs a file\n";
-						exit(1);
+						exitMPI(1);
 					}
 					else{
 						outFile = cargs[i].c_str();
@@ -120,12 +125,11 @@ int main(int argc, char* argv[]){
 
 	if(mpi.rank == mpi.MASTER) {
 		printf("In:\t%s\nOut:\t%s\nUseMpi:\t%s\n", inFile, outFile, useMpi ? "true" : "false");
-	}else{
-		if(!useMpi){
-			 exit(0);
-		}
 	}
 	
+	initCounter();
+	startCounter();
+
 	WavData w;
 	int* sendcnts = (int*) malloc(sizeof(int)*mpi.size);
 	int* disps = (int*) malloc(sizeof(int)*mpi.size);
@@ -141,6 +145,8 @@ int main(int argc, char* argv[]){
 			disp += sendcnts[i];
 		}
 	}
+
+
 
 	MPI_Bcast(sendcnts, mpi.size, MPI_INT, mpi.MASTER, MPI_COMM_WORLD);
 	
@@ -174,8 +180,6 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	initCounter();
-	startCounter();
 
 	ComplexArr x1 = recurFFT(x);
 	x1 = shiftFreqs(x1, 1.f);
@@ -183,8 +187,6 @@ int main(int argc, char* argv[]){
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
 
-	double time = getCounter();
-//	printf("Time: %fms\n\n", time);
 	recvBuf = writeComplexToFloat(x2);
 
 	MPI_Gatherv(recvBuf.data(), sendcnts[mpi.rank], MPI_FLOAT,
@@ -197,6 +199,8 @@ int main(int argc, char* argv[]){
 		wOut.info = w.info;
 		wOut.data = w.data;
 		saveWavData(outFile, wOut);
+		double time = getCounter();
+		printf("Time: %fms\n\n", time);
 	}
 	
 	MPI_Finalize();
@@ -212,7 +216,7 @@ WavData loadWavData(const char* file){
 	sf = sf_open(file, SFM_READ, &(w.info));
 	if (sf == NULL){
 		puts("Failed to open the file.\n");
-		exit(-1);
+		exitMPI(-1);
 	}
 	puts("File opened\n");
 
