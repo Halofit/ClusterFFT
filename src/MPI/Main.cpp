@@ -187,7 +187,7 @@ int main(int argc, char* argv[]){
 	x2 = normalise(x2);
 
 	double time = getCounter();
-	printf("Time: %fms\n\n", time);
+//	printf("Time: %fms\n\n", time);
 	recvBuf = writeComplexToFloat(x2);
 
 	MPI_Gatherv(recvBuf.data(), sendcnts[mpi.rank], MPI_FLOAT,

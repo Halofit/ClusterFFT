@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <string.h>
 #include <pthread.h>
 
@@ -359,15 +360,27 @@ void *client_handle(void *s){
 	// TODO: DO SOME HARD WORK - FFT
 	// ALL FILES ARE SAVED AS number_name
 	// EXPECTED FILES AFTER FFT AS out_number_name - FFT should remove number_name files
-	#ifdef _WIN32
+	double start = dtime();
+	for (i; i < numFiles; i++){
+		std::string command = "mpiexec -machinefile machinefile -n 3 ~/RunFFT/clusterFFT.out -mpi -i ";
+		command += listOfFiles[i];
+		command += " -o ";
+		command += listOfFilesOUT[i];
+		int result = system(command.c_str());
+	}
+	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || WTERMSIG(ret) == SIGQUIT)){
+		printf("ERROR System returned: %d", result);
+		exit(1);
+	}
+	double end = dtime();
+	/*#ifdef _WIN32
 		Sleep(5000);
 	#else
 		usleep(static_cast<useconds_t>(5000) * 1000);
 	#endif
-
+	*/
+	printf("FFT Time: %ls sec\n", (end - start));
 	printf("\n");
-
-	printf("Sending files back to client ...\n");
 
 	// Send all files back
 	for (i = 0; i < numFiles; i++){
@@ -380,6 +393,8 @@ void *client_handle(void *s){
 	for (i = 0; i < numFiles; i++){
 		if (remove(listOfFiles[i]))
 			printf("ERROR while removing file! (%s)\n", listOfFiles[i]);
+		if (remove(listOfFilesOUT[i]))
+			printf("ERROR while removing output file! (%s)\n", listOfFiles[i]);
 	}
 
 	// Clean up
