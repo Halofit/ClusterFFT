@@ -186,8 +186,6 @@ int main(int argc, char* argv[]){
 	ComplexArr x2 = recurIFFT(x1);
 	x2 = normalise(x2);
 
-	double time = getCounter();
-//	printf("Time: %fms\n\n", time);
 	recvBuf = writeComplexToFloat(x2);
 
 	MPI_Gatherv(recvBuf.data(), sendcnts[mpi.rank], MPI_FLOAT,
@@ -200,6 +198,8 @@ int main(int argc, char* argv[]){
 		wOut.info = w.info;
 		wOut.data = w.data;
 		saveWavData(outFile, wOut);
+		double time = getCounter();
+		printf("Time: %fms\n\n", time);
 	}
 	
 	MPI_Finalize();
