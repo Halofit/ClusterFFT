@@ -471,7 +471,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	printf("Uploading %d files to server ...\n", numFiles);
-	double startSending = dtime();
+	double startALL = dtime();
 	// Send files
 	for (i = 0; i < numFiles; i++){
 		if (send_file(serverSock, listOfFiles[i], i))
@@ -488,14 +488,16 @@ int main(int argc, char *argv[]){
 
 	printf("\n");
 	printf("Downloading %d files from server ...\n", numFiles);
+	double startReceiving = dtime();
 	// Receive files
 	for (i = 0; i < numFiles; i++){
 		if (receive_file(serverSock, listOfFiles[i]))
 			printf("ERROR while receiving file! (%s) \n", listOfFiles[i]);
 	}
-	double endSending = dtime();
-	
-	printf("All Time: $f\n", (endSending - startSending));
+	double endReceiving = dtime();
+	double endALL = dtime();
+	printf("Receiving time: %0.4f\n", (endReceiving - startReceiving));
+	printf("Time passed (ALL): %0.4f\n", (endALL - startALL));
 	
 	// Clean up
 	for (i = 0; i < numFiles; i++)
