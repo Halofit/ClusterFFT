@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <iostream>
 #include <string.h>
 #include <pthread.h>
@@ -259,6 +260,7 @@ int receive_file(int clientSock, char **listOfFiles, char **listOfFilesOUT){
 	strncat(tempCount, tempFilename, sizeof(tempCount)-strlen(tempCount) - 1);
 	*listOfFiles = strdup(tempCount);
 	// Prepare FFT outfile name
+	memset(&filename[0], 0, fileNameSize);
 	strncpy(filename, "out_", sizeof(filename));
 	strncat(filename, tempCount, sizeof(filename)-strlen(filename) - 1);
 	*listOfFilesOUT = strdup(filename);
@@ -363,14 +365,15 @@ void *client_handle(void *s){
 	// DO SOME HARD WORK - FFT
 	int result;
 	double startFFT = dtime();
-	for (i; i < numFiles; i++){
+	for (i = 0; i < numFiles; i++){
 		std::string command = "mpiexec -machinefile machinefile -n 3 ~/RunFFT/clusterFFT.out -mpi -i ";
 		command += listOfFiles[i];
 		command += " -o ";
 		command += listOfFilesOUT[i];
 		result = system(command.c_str());
 	}
-	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || WTERMSIG(ret) == SIGQUIT)){
+	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || 
+WTERMSIG(result) == SIGQUIT)){
 		printf("ERROR System returned: %d", result);
 		exit(1);
 	}
