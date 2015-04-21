@@ -179,7 +179,7 @@ int main(int argc, char* argv[]){
 	}
 
 	if(mpi.rank == mpi.MASTER) {
-		printf("In:\t%s\nOut:\t%s\n", inFile, outFile);
+		printf("In:\t%s\nOut:\t%s\nMagnitude: %f\n", inFile, outFile, functMagn);
 	}
 	
 	initCounter();
@@ -240,7 +240,7 @@ int main(int argc, char* argv[]){
 	
 	switch(funct){
 		case(FFTFun::ARR_SHIFT) :{
-			x = shiftFreqs(x, functMagn);
+			x = shiftArray(x, size_t(functMagn));
 			x = mirrorArray(x);
 		}
 		break;
@@ -251,12 +251,13 @@ int main(int argc, char* argv[]){
 		break;
 
 		case(FFTFun::FREQ_SPEED) :{
-			x = shiftArray(x, size_t(functMagn));
+			x = shiftFreqs(x, size_t(functMagn));
 		}
 		break;
 
 		case(FFTFun::NONE):
 		default:
+			if(mpi.rank == mpi.MASTER) std::cout << "NO FUNCTION! \n";
 			break;
 	}
 	
