@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <iostream>
 #include <string.h>
 #include <pthread.h>
@@ -259,6 +260,7 @@ int receive_file(int clientSock, char **listOfFiles, char **listOfFilesOUT){
 	strncat(tempCount, tempFilename, sizeof(tempCount)-strlen(tempCount) - 1);
 	*listOfFiles = strdup(tempCount);
 	// Prepare FFT outfile name
+	memset(&filename[0], 0, fileNameSize);
 	strncpy(filename, "out_", sizeof(filename));
 	strncat(filename, tempCount, sizeof(filename)-strlen(filename) - 1);
 	*listOfFilesOUT = strdup(filename);
@@ -351,35 +353,33 @@ void *client_handle(void *s){
 
 	// Receive all files
 	int i = 0;
+	double startReceiving = dtime();
 	for (i; i < numFiles; i++){
 		if (receive_file(clientSock, &listOfFiles[i], &listOfFilesOUT[i])){
 			printf("ERROR while receiving file! \n");
 		}
 	}
-
-	// TODO: DO SOME HARD WORK - FFT
-	// ALL FILES ARE SAVED AS number_name
-	// EXPECTED FILES AFTER FFT AS out_number_name - FFT should remove number_name files
-	double start = dtime();
-	for (i; i < numFiles; i++){
+	double endReceiving = dtime();
+	printf("Receiving Time: %0.4f sec\n", (endReceiving - startReceiving));
+	printf("\n =============================== FFT OUTPUT =============================== \n");
+	// DO SOME HARD WORK - FFT
+	int result;
+	double startFFT = dtime();
+	for (i = 0; i < numFiles; i++){
 		std::string command = "mpiexec -machinefile machinefile -n 3 ~/RunFFT/clusterFFT.out -mpi -i ";
 		command += listOfFiles[i];
 		command += " -o ";
 		command += listOfFilesOUT[i];
-		int result = system(command.c_str());
+		result = system(command.c_str());
 	}
-	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || WTERMSIG(ret) == SIGQUIT)){
+	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || 
+WTERMSIG(result) == SIGQUIT)){
 		printf("ERROR System returned: %d", result);
 		exit(1);
 	}
-	double end = dtime();
-	/*#ifdef _WIN32
-		Sleep(5000);
-	#else
-		usleep(static_cast<useconds_t>(5000) * 1000);
-	#endif
-	*/
-	printf("FFT Time: %ls sec\n", (end - start));
+	double endFFT = dtime();
+	printf("\n ========================================================================== \n");
+	printf("FFT Time: %0.4f sec\n", (endFFT - startFFT));
 	printf("\n");
 
 	// Send all files back

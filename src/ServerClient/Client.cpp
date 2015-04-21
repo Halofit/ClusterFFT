@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+#include <algorithm>
 
 #ifdef __linux__ 
 #include <sys/time.h>
@@ -123,8 +125,8 @@ void read_line(int* length, char** oldBuff, FILE *input){
 	int c;
 
 	// Read until end of line
-	while((c = fgetc(input)) != '\n') {
-		if (c == EOF || c == '\n' || c== '\0') break;
+	while ((c = fgetc(input)) != '\n') {
+		if (c == EOF || c == '\n' || c == '\0') break;
 
 		// Char to buffer
 		*buff++ = c;
@@ -163,7 +165,7 @@ void loader(int val, int max, int size){
 
 	if (count == lastPrinted)
 		return;
-	
+
 	printf("\r[");
 
 	int i;
@@ -191,7 +193,7 @@ void loader(int val, int max, int size){
 *	Returns:	1 if ERROR
 *				0 if SUCCESS
 */
-int receive_file(int serverSock, char* filename){
+int receive_file(int serverSock, char* filename, int i, int numFiles, double *startReceive){
 
 	int nBytes;
 	// Prepare buffer
@@ -202,9 +204,15 @@ int receive_file(int serverSock, char* filename){
 	nBytes = recv(serverSock, temp, SIZE_FILE_SIZE, 0);
 	if (nBytes <= 0)
 		return socket_error();
+	// Accepting first file
+	if (i == 0){
+		*startReceive = dtime();
+		printf("Downloading %d files from server ...\n", numFiles);
+	}
+
 	int fileSize = (int)strtol(temp, (char **)NULL, 10);
 
-	printf("Downloading from server (%s) : %s\n", serverIP,filename);
+	printf("Downloading from server (%s) : %s\n", serverIP, filename);
 	FILE *f = fopen(filename, "wb");
 
 	if (f == NULL){
@@ -220,7 +228,7 @@ int receive_file(int serverSock, char* filename){
 	while (n < fileSize){
 
 		// Set buffer size - if buffer size too big receive less bytes (to get bytes of this file not others)
-		((fileSize - n) < BUFFER_SIZE) ? currBuffSize = fileSize-n : currBuffSize = BUFFER_SIZE;
+		((fileSize - n) < BUFFER_SIZE) ? currBuffSize = fileSize - n : currBuffSize = BUFFER_SIZE;
 
 		// Receive data 
 		nBytes = recv(serverSock, buff, currBuffSize, 0);
@@ -231,10 +239,12 @@ int receive_file(int serverSock, char* filename){
 			if (LOADER){
 				loader(n, fileSize, LOADER_LENGTH);
 			}
-		}else if (nBytes == 0){
+		}
+		else if (nBytes == 0){
 			printf("Connection closing...\n");
 			break;
-		}else{
+		}
+		else{
 			socket_error();
 			break;
 		}
@@ -255,7 +265,7 @@ int receive_file(int serverSock, char* filename){
 /*
 * send_file
 * -----------
-*	Send file's information (file size, 
+*	Send file's information (file size,
 *	size of file's name,  file's name)
 *	and data to server
 *
@@ -315,14 +325,14 @@ int send_file(int serverSock, char *filename, int row){
 		return 1;
 	}
 	//Total bytes written and last printed 
-	int n = 0; 
+	int n = 0;
 	lastPrinted = 0;
 
 	// Prepare buffer
 	char buff[BUFFER_SIZE];
 
 	// Upload file to server
-	printf("Uploading to server (%s) : %s\n",serverIP,name);
+	printf("Uploading to server (%s) : %s\n", serverIP, name);
 	fflush(stdout);
 	while (!feof(f)){
 
@@ -380,9 +390,9 @@ int main(int argc, char *argv[]){
 	FILE *input = stdin;
 
 	// Prints working directory
-	#ifdef _WIN32
+#ifdef _WIN32
 	getCWD();
-	#endif
+#endif
 
 	// If server's ip not set - error
 	if (argc < 2)	{
@@ -418,13 +428,13 @@ int main(int argc, char *argv[]){
 	// Max length of file name 
 	//char *line = (char *)malloc(LINE_LENGTH*sizeof(char));
 	int i = 0;
-	
+
 	if (argc < 3)
 		printf("\nWrite files to transfer: \n");
 
 	// Read lines from STDIN or GIVEN FILE
 	for (i; i < numFiles; i++){
-		read_line(&lineLength, &listOfFiles[i],input);
+		read_line(&lineLength, &listOfFiles[i], input);
 	}
 
 	// Close master file
@@ -471,27 +481,36 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	printf("Uploading %d files to server ...\n", numFiles);
+	double startALL = dtime();
 	// Send files
 	for (i = 0; i < numFiles; i++){
 		if (send_file(serverSock, listOfFiles[i], i))
 			printf("ERROR while sending %s file. \n", listOfFiles[i]);
 	}
-	
+
 	// Prepare outfile names while waiting for server
 	char* tempFilename;
 	for (i = 0; i < numFiles; i++){
 		tempFilename = strdup(listOfFiles[i]);
-		strncpy(listOfFiles[i] , "out_", sizeof(listOfFiles[i]));
+		//std::fill(listOfFiles[i], listOfFiles[i] + LINE_LENGTH, 0);
+		memset(&listOfFiles[i][0], 0, LINE_LENGTH);
+		strncpy(listOfFiles[i], "out_", sizeof(listOfFiles[i]));
 		strncat(listOfFiles[i], tempFilename, sizeof(listOfFiles[i]) - strlen(listOfFiles[i]) - 1);
 	}
 
 	printf("\n");
-	printf("Downloading %d files from server ...\n", numFiles);
+	//printf("Downloading %d files from server ...\n", numFiles);
+	printf("Running FFT on server ...\n\n");
+	double startReceiving;
 	// Receive files
 	for (i = 0; i < numFiles; i++){
-		if (receive_file(serverSock, listOfFiles[i]))
+		if (receive_file(serverSock, listOfFiles[i],i,numFiles, &startReceiving))
 			printf("ERROR while receiving file! (%s) \n", listOfFiles[i]);
 	}
+	double endReceiving = dtime();
+	double endALL = dtime();
+	printf("\nReceiving time: %0.4f sec\n", endReceiving - startReceiving);
+	printf("Time passed (ALL): %0.4f sec\n", endALL - startALL);
 
 	// Clean up
 	for (i = 0; i < numFiles; i++)
