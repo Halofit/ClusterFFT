@@ -26,6 +26,14 @@ Complex getLargestElement(ComplexArr arr){
 	return retVal;
 }
 
+ComplexArr powArray(ComplexArr arr, float exponent){
+	ComplexArr retVal;
+	for (size_t i = 0; i < arr.size(); i++) {
+		retVal[i] = std::pow(arr[i], exponent);
+	}
+	return retVal;
+}
+
 ComplexArr squareArray(ComplexArr arr){
 	ComplexArr retVal;
 	retVal = arr*arr;

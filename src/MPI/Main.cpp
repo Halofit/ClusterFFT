@@ -2,8 +2,9 @@
 
 #define _USE_MATH_DEFINES
 
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <sstream>
 #include <cmath>
 #include <valarray>
 #include <complex>
@@ -62,14 +63,30 @@ constexpr float operator"" _Hz (float hertz){
 }*/
 
 enum class CmdArgs {
-	ARG_FILE_IN, ARG_FILE_OUT, ARG_USE_MPI
+	ARG_FILE_IN, ARG_FILE_OUT, ARG_USE_MPI,
+	ARG_USE_FUNCTION, ARG_FUNCTION_MAGNITUDE
 };
+
+enum class FFTFun {
+	NONE, ARR_SHIFT, POWER, FREQ_SPEED
+};
+
+const std::map<std::string, FFTFun> ffrFunctOptions = 
+{
+	{"none", FFTFun::NONE},
+	{"shift", FFTFun::ARR_SHIFT},
+	{"power", FFTFun::POWER},
+	{"speed", FFTFun::FREQ_SPEED},
+};
+
 
 const std::map<std::string, CmdArgs> options = 
 {
 	{"-i", CmdArgs::ARG_FILE_IN},
 	{"-o", CmdArgs::ARG_FILE_OUT},
 	{"-mpi", CmdArgs::ARG_USE_MPI},
+	{"-f", CmdArgs::ARG_USE_FUNCTION},
+	{"-m", CmdArgs::ARG_FUNCTION_MAGNITUDE},
 };
 
 int main(int argc, char* argv[]){
@@ -80,7 +97,8 @@ int main(int argc, char* argv[]){
 
 	const char* inFile = "kq15.wav";
 	const char* outFile = "out.wav";
-	bool useMpi = false;
+	FFTFun funct = FFTFun::NONE;
+	float functMagn = 1.f;
 
 	//Get arguments into a vector
 	std::vector<std::string> cargs(argv, argv + argc);
@@ -117,14 +135,51 @@ int main(int argc, char* argv[]){
 				};
 
 				case CmdArgs::ARG_USE_MPI :{
-					useMpi = true;
+					
 				}
+
+				case CmdArgs::ARG_USE_FUNCTION :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						if(mpi.rank == mpi.MASTER) std::cout << "Error, -f needs a function\n";
+						exitMPI(1);
+					}
+					else{
+						auto lookUp = ffrFunctOptions.find(cargs[i]);
+						if(lookUp == ffrFunctOptions.end()){
+							if(mpi.rank == mpi.MASTER) std::cout << "Unknown function " << cargs[i] << "\n";
+							exitMPI(2);
+						}else{
+							funct = ffrFunctOptions.at(cargs[i]);
+						}
+					}
+					break;
+				};
+				
+				case CmdArgs::ARG_FUNCTION_MAGNITUDE :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						if(mpi.rank == mpi.MASTER) std::cout << "Error, -m needs a magnitude\n";
+						exitMPI(1);
+					}
+					else{
+						std::stringstream ss;
+						ss << cargs[i];
+						ss >> functMagn;
+
+						if(ss.fail()){
+							std::cout << "Error, -m needs valid number.\n";
+							exitMPI(1);
+						}
+					}
+					break;
+				};
 			}
 		}
 	}
 
 	if(mpi.rank == mpi.MASTER) {
-		printf("In:\t%s\nOut:\t%s\nUseMpi:\t%s\n", inFile, outFile, useMpi ? "true" : "false");
+		printf("In:\t%s\nOut:\t%s\n", inFile, outFile);
 	}
 	
 	initCounter();
@@ -181,13 +236,34 @@ int main(int argc, char* argv[]){
 	}
 
 
-	ComplexArr x1 = recurFFT(x);
-	x1 = shiftFreqs(x1, 1.f);
-	x = mirrorArray(x);
-	ComplexArr x2 = recurIFFT(x1);
-	x2 = normalise(x2);
+	x = recurFFT(x);
+	
+	switch(funct){
+		case(FFTFun::ARR_SHIFT) :{
+			x = shiftFreqs(x, functMagn);
+			x = mirrorArray(x);
+		}
+		break;
 
-	recvBuf = writeComplexToFloat(x2);
+		case(FFTFun::POWER) :{
+			x = powArray(x, functMagn);
+		}
+		break;
+
+		case(FFTFun::FREQ_SPEED) :{
+			x = shiftArray(x, size_t(functMagn));
+		}
+		break;
+
+		case(FFTFun::NONE):
+		default:
+			break;
+	}
+	
+	x = recurIFFT(x);
+	x = normalise(x);
+
+	recvBuf = writeComplexToFloat(x);
 
 	MPI_Gatherv(recvBuf.data(), sendcnts[mpi.rank], MPI_FLOAT,
                 w.data.data(), sendcnts, disps,

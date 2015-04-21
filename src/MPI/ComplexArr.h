@@ -14,6 +14,7 @@ bool operator<(const Complex &a, const Complex &b);
 ComplexArr recurFFT(ComplexArr arr);
 ComplexArr recurIFFT(ComplexArr arr);
 
+ComplexArr powArray(ComplexArr arr, float exponent);
 ComplexArr squareArray(ComplexArr arr);
 ComplexArr shiftArray(ComplexArr arr, size_t n);
 ComplexArr shiftFreqs(ComplexArr arr, float constant);
