@@ -1,0 +1,65 @@
+\documentclass[slovene]{book}
+\usepackage{amsmath} 
+\usepackage{amssymb} 
+\usepackage{makeidx} 
+\usepackage{graphicx} 
+\usepackage{epstopdf}
+\graphicspath{{img/}}
+
+\usepackage{url}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[cp1250]{inputenc}
+
+\usepackage{color}
+\usepackage[normalem]{ulem}
+% define red
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+%\includeonly{chaptr2} %If you just want to process chaptr2.tex
+
+%%%
+% new commands
+%%%
+
+\newcommand{\eng}[1]{(angl.~\emph{#1})}
+
+%%%
+% definicija
+%%%
+
+\newtheorem{definicija}{Definicija}
+
+%%%
+% Zgled
+%%%
+
+\newtheorem{zgled}{Zgled}
+
+%%%
+% document
+%%%
+
+\begin{document}
+
+\author{Uredil prof. dr. Miha Mraz}
+\title{Analiza zmogljivosti oblaènih in strežniških storitev}
+\date{Maj 2015}
+\maketitle
+
+\frontmatter
+\tableofcontents
+\include{preface}
+
+\mainmatter
+
+\include{poglavje01} % 1.Poglavje
+
+\backmatter
+%\include{glossary}
+%\include{notat}
+\bibliographystyle{ieeetr} %The style you want to use for references.
+\bibliography{mro} %The files containing all the articles and books you ever referenced.
+\printindex %Make an index AUTOMATICALLY
+
+\end{document} 
