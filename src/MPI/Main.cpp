@@ -107,14 +107,14 @@ int main(int argc, char* argv[]){
 		auto lookUp = options.find(cargs[i]);
 		if(lookUp == options.end()){
 			if(mpi.rank == mpi.MASTER) std::cout << "Unknown command " << cargs[i] << "\n";
-			exitMPI(2);
+			exitMPI(3);
 		}else{
 			switch(options.at(cargs[i])){
 				case CmdArgs::ARG_FILE_IN :{
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -i needs a file\n";
-						exitMPI(1);
+						exitMPI(4);
 					}
 					else{
 						inFile = cargs[i].c_str();
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]){
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -o needs a file\n";
-						exitMPI(1);
+						exitMPI(4);
 					}
 					else{
 						outFile = cargs[i].c_str();
@@ -142,13 +142,13 @@ int main(int argc, char* argv[]){
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -f needs a function\n";
-						exitMPI(1);
+						exitMPI(5);
 					}
 					else{
 						auto lookUp = ffrFunctOptions.find(cargs[i]);
 						if(lookUp == ffrFunctOptions.end()){
 							if(mpi.rank == mpi.MASTER) std::cout << "Unknown function " << cargs[i] << "\n";
-							exitMPI(2);
+							exitMPI(6);
 						}else{
 							funct = ffrFunctOptions.at(cargs[i]);
 						}
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
 					i++; //go to next arg
 					if(i == cargs.size()){
 						if(mpi.rank == mpi.MASTER) std::cout << "Error, -m needs a magnitude\n";
-						exitMPI(1);
+						exitMPI(7);
 					}
 					else{
 						std::stringstream ss;
@@ -169,7 +169,7 @@ int main(int argc, char* argv[]){
 
 						if(ss.fail()){
 							std::cout << "Error, -m needs valid number.\n";
-							exitMPI(1);
+							exitMPI(8);
 						}
 					}
 					break;
