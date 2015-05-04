@@ -135,7 +135,7 @@ int main(int argc, char* argv[]){
 				};
 
 				case CmdArgs::ARG_USE_MPI :{
-					
+					break;	
 				}
 
 				case CmdArgs::ARG_USE_FUNCTION :{
