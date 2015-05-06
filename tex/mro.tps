@@ -11,14 +11,14 @@ MaxPos.x=-1
 MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
-NormalPos.right=985
-NormalPos.bottom=520
+NormalPos.right=1008
+NormalPos.bottom=257
 Class=LaTeXView
-Document=mro.tex
+Document=poglavje04.tex
 
 [Frame0_View0,0]
-TopLine=41
-Cursor=731
+TopLine=26
+Cursor=2347
 
 [Frame1]
 Flags=0
@@ -29,36 +29,18 @@ MaxPos.x=-1
 MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
-NormalPos.right=985
-NormalPos.bottom=520
-Class=BibTeXView
-Document=mro.bib
+NormalPos.right=1008
+NormalPos.bottom=257
+Class=LaTeXView
+Document=mro.tex
 
 [Frame1_View0,0]
-TopLine=188
-Cursor=4822
-
-[Frame2]
-Flags=0
-ShowCmd=1
-MinPos.x=-1
-MinPos.y=-1
-MaxPos.x=-1
-MaxPos.y=-1
-NormalPos.left=4
-NormalPos.top=26
-NormalPos.right=985
-NormalPos.bottom=520
-Class=LaTeXView
-Document=poglavje01.tex
-
-[Frame2_View0,0]
-TopLine=7
-Cursor=777
+TopLine=45
+Cursor=894
 
 [SessionInfo]
-FrameCount=3
-ActiveFrame=0
+FrameCount=2
+ActiveFrame=1
 
 [Bookmarks]
 mro.bib=195 
