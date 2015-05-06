@@ -235,7 +235,6 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-
 	x = recurFFT(x);
 	
 	switch(funct){
@@ -261,6 +260,7 @@ int main(int argc, char* argv[]){
 			break;
 	}
 	
+
 	x = recurIFFT(x);
 	x = normalise(x);
 
