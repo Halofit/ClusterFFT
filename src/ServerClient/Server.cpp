@@ -159,7 +159,10 @@ int send_file(int clientSock, char *filename){
 	// Header - Send file's size
 	char size[SIZE_FILE_SIZE];
 	sprintf(size, "%d", fileSize);
+	
+	
 	nBytes = send(clientSock, size, SIZE_FILE_SIZE, 0);
+	printf("POSLANO: %d VELIKOST: %d VELIKOST I:%d\n",nBytes,size, fileSize);
 	if (nBytes <= 0)
 		return socket_error();
 
@@ -178,16 +181,19 @@ int send_file(int clientSock, char *filename){
 
 	int read = 0;
 	while (!feof(f)){
+//		printf("FREAD\n");
 		// Read bytes to buffer
 		read = fread(buff, 1, BUFFER_SIZE, f);
-		if (read < 0){
+		if (read <= 0){
 			printf("ERROR while reading file. \n");
 			break;
 		}
 
 		// Send bytes from buffer
+//		printf("SEND %d\n",read);
 		nBytes = send(clientSock, buff, read, 0);
-		if (nBytes < 0){
+//		printf("AFTERSEND %d\n",nBytes);
+		if (nBytes <= 0){
 			socket_error();
 			break;
 		}
@@ -334,7 +340,15 @@ void *client_handle(void *s){
 	clientInfo *c = (clientInfo*)s;
 	int nBytes;
 	int clientSock = (int)c->clientSock;
+	
+	char fun[20];
+	std::string function;
+	function.reserve(20);
 
+	char mag[5];
+	std::string magnitude;
+	magnitude.reserve(5);
+	
 	// Receive number of files or end client session
 	char numFilesChar;
 	nBytes = recv(clientSock, &numFilesChar, sizeof(char), 0);
@@ -343,6 +357,23 @@ void *client_handle(void *s){
 		close_thread(clientSock);
 		return NULL;
 	}
+	// Receive name of function
+	nBytes = recv(clientSock, fun, 20, 0);
+	if(nBytes < 0){
+		socket_error();
+		close_thread(clientSock);
+		return NULL;
+	}
+	// Receive magnitude
+	nBytes = recv(clientSock, mag, 5, 0);
+	if(nBytes < 0){
+		socket_error();
+		close_thread(clientSock);
+		return NULL;
+	}
+	
+	function = fun;
+	magnitude = mag;
 
 	int numFiles = (int)numFilesChar;
 
@@ -366,7 +397,11 @@ void *client_handle(void *s){
 	int result;
 	double startFFT = dtime();
 	for (i = 0; i < numFiles; i++){
-		std::string command = "mpiexec -machinefile machinefile -n 3 ~/RunFFT/clusterFFT.out -mpi -i ";
+		std::string command = "mpiexec -machinefile machinefile -n 4 ~/RunFFT/clusterFFT.out -f ";
+		command += function;
+		command += " -m ";
+		command += magnitude;
+		command += " -i ";
 		command += listOfFiles[i];
 		command += " -o ";
 		command += listOfFilesOUT[i];
@@ -384,8 +419,8 @@ WTERMSIG(result) == SIGQUIT)){
 
 	// Send all files back
 	for (i = 0; i < numFiles; i++){
-		if (send_file(clientSock, listOfFiles[i]))
-			printf("ERROR while sending file! (%s)\n", listOfFiles[i]);
+		if (send_file(clientSock, listOfFilesOUT[i]))
+			printf("ERROR while sending file! (%s)\n", listOfFilesOUT[i]);
 	}
 
 	printf("\nRemoving files ...\n");
@@ -394,7 +429,7 @@ WTERMSIG(result) == SIGQUIT)){
 		if (remove(listOfFiles[i]))
 			printf("ERROR while removing file! (%s)\n", listOfFiles[i]);
 		if (remove(listOfFilesOUT[i]))
-			printf("ERROR while removing output file! (%s)\n", listOfFiles[i]);
+			printf("ERROR while removing output file! (%s)\n", listOfFilesOUT[i]);
 	}
 
 	// Clean up
@@ -446,6 +481,13 @@ int main(int argc, char **argv){
 		errorexit(listenerSock, "ERROR opening socket.");
 	}
 
+	int optval = 1;
+	socklen_t optlen = sizeof(optval);
+	if(setsockopt(listenerSock,SOL_SOCKET,SO_KEEPALIVE, &optval, optlen) < 0){
+		server_exit(listenerSock);
+		errorexit(listenerSock,"ERROR on binding.");
+	}
+
 	// Initialize socket structure
 	memset(&servAddr, '0', sizeof(servAddr));
 
@@ -459,7 +501,9 @@ int main(int argc, char **argv){
 		server_exit(listenerSock);
 		errorexit(listenerSock, "ERROR on binding.");
 	}
-
+	
+	
+	
 	// Starts listening
 	listen(listenerSock, CLIENT_LIMIT);
 	clilen = sizeof(cliAddr);
@@ -468,10 +512,17 @@ int main(int argc, char **argv){
 
 		// Create connection
 		clientSock = accept(listenerSock, (struct sockaddr *)&cliAddr, &clilen);
-
+		
+		
 		if (clientSock < 0){
 			server_exit(listenerSock);
 			errorexit(clientSock, "ERROR on accept client.");
+		}
+		
+		
+		if (setsockopt(clientSock, SOL_SOCKET,SO_KEEPALIVE, &optval,optlen) < 0){
+			server_exit(listenerSock);
+			errorexit(clientSock,"ERROR on set client.");
 		}
 
 		// Creates new client thread and arguments
