@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "sndfile.h"
+#include "../Common/sndfile.h"
 #include "gnuplotCall.h"
 #include "../Common/ComplexArr.h"
 
@@ -47,7 +47,7 @@ constexpr float operator"" _Hz (float hertz){
 }*/
 
 enum class CmdArgs {
-	ARG_FILE_IN, ARG_FILE_OUT, ARG_USE_MPI
+	ARG_FILE_IN, ARG_FILE_OUT, ARG_USE_MPI, ARG_USE_FUNCTION, ARG_USE_MAGNITUDE,
 };
 
 const std::map<std::string, CmdArgs> options = 
@@ -64,19 +64,18 @@ int main(int argc, char* argv[]){
 
 	//Get arguments into a vector
 	std::vector<std::string> cargs(argv, argv + argc);
-	
 	for (size_t i = 1; i < cargs.size(); i++) {
 		auto lookUp = options.find(cargs[i]);
 		if(lookUp == options.end()){
 			std::cout << "Unknown command " << cargs[i] << "\n";
-			exit(2);
+			exit(3);
 		}else{
 			switch(options.at(cargs[i])){
 				case CmdArgs::ARG_FILE_IN :{
 					i++; //go to next arg
 					if(i == cargs.size()){
 						std::cout << "Error, -i needs a file\n";
-						exit(1);
+						exit(4);
 					}
 					else{
 						inFile = cargs[i].c_str();
@@ -88,7 +87,7 @@ int main(int argc, char* argv[]){
 					i++; //go to next arg
 					if(i == cargs.size()){
 						std::cout << "Error, -o needs a file\n";
-						exit(1);
+						exit(4);
 					}
 					else{
 						outFile = cargs[i].c_str();
@@ -97,9 +96,45 @@ int main(int argc, char* argv[]){
 				};
 
 				case CmdArgs::ARG_USE_MPI :{
-					std::cout << "Mpi not supported. Use the mpi version of the program\n";
-					exit(1);
+					break;	
 				}
+
+				case CmdArgs::ARG_USE_FUNCTION :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						std::cout << "Error, -f needs a function\n";
+						exit(5);
+					}
+					else{
+						auto lookUp = ffrFunctOptions.find(cargs[i]);
+						if(lookUp == ffrFunctOptions.end()){
+							std::cout << "Unknown function " << cargs[i] << "\n";
+							exit(6);
+						}else{
+							funct = ffrFunctOptions.at(cargs[i]);
+						}
+					}
+					break;
+				};
+				
+				case CmdArgs::ARG_FUNCTION_MAGNITUDE :{
+					i++; //go to next arg
+					if(i == cargs.size()){
+						if(mpi.rank == mpi.MASTER) std::cout << "Error, -m needs a magnitude\n";
+						exit(7);
+					}
+					else{
+						std::stringstream ss;
+						ss << cargs[i];
+						ss >> functMagn;
+
+						if(ss.fail()){
+							std::cout << "Error, -m needs valid number.\n";
+							exit(8);
+						}
+					}
+					break;
+				};
 			}
 		}
 	}

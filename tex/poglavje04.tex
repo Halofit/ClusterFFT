@@ -10,7 +10,7 @@ Med slednje spadajo hitrost in latenca povezave od naprave uporabnika (end point
 
 Kot omenjeno zgoraj se na spletu najdejo seznami spletnih sistemov, ki jih lahko uporabniki med seboj primerjajo. Primerjajo lahko rezultate za razliène parametre kot so hitrost procesorja pri raèunanju s plavajoèo vejico ali celimi števili, hitrost prenosa pri branju podatkov oz. pisanju na pomnilnih enotah, hitrost prenosa podatkov lokalno znotraj oblaène storitve in drugo. Pri testiranju teh parametrov se lahko uporabi razlièna orodja kot so SPEC CPU 2006, Test Harness, TeraSort, Geekbench in še mnogo drugih. Pri sami izbiri programov se moramo osredotoèiti tudi na bremena, ki jih lahko s posameznim programom definiramo in tako testiramo željene parametre. Kljuèen kriterij poleg kakovosti storitev in definiranje bremen je tudi cena. Zaželjeni so prosto dostopni oz. zastonjski progami. 
 
-Pri testiranju spletnih strežnikov (S1) uporabnika navadno zanima število zahtev, ki jih strežnik obdela, latenca oz. èas odziva strežnika za novo povezavo ali zahtevek, in kolièina prenesenih podatkov v sekundi, glede na razliène parametre (velikost, shranjevanje v predpomnilnik, razlièna pasovna širina). Za izvajanje stresnih testov se na spletu nahaja veliko orodij, ki lahko pridejo v pomoè (Apachech, Apache JMeter, Curl-loader, OpenSTA â€¦). 
+Pri testiranju spletnih strežnikov (S1) uporabnika navadno zanima število zahtev, ki jih strežnik obdela, latenca oz. èas odziva strežnika za novo povezavo ali zahtevek, in kolièina prenesenih podatkov v sekundi, glede na razliène parametre (velikost, shranjevanje v predpomnilnik, razlièna pasovna širina). Za izvajanje stresnih testov se na spletu nahaja veliko orodij, ki lahko pridejo v pomoè (Apachech, Apache JMeter, Curl-loader, OpenSTA). 
 
 \subsection{Znanje}
 
@@ -92,14 +92,14 @@ Vse teste smo ponovili trikrat.
 \subsection{Izmerjeni èasi: razlièno velike datoteke}
 
 \begin{table}[h]
-\begin{tabular}{l|cccc}
+\begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    & 6,36      &    21,85  &    86,11   &   359,54   &            \\
-     & 6,23      &    20,70  &    85,98   &   361,90   &            \\
-     & 6,48      &    21,73  &    84,97   &   363,97   &            \\ \cline{1-6}
-2    & 5,27      &    14,50  &    44,69   &   179,31   &            \\
-     & 5,23      &    14,08  &    48,99   &   179,84   &            \\
-     & 5,20      &    13,08  &    48,35   &   178,99   &            \\ \cline{1-6}
+1    & 6,36      &    21,85  &    86,11   &   359,54                \\
+     & 6,23      &    20,70  &    85,98   &   361,90                \\
+     & 6,48      &    21,73  &    84,97   &   363,97                \\ \cline{1-6}
+2    & 5,27      &    14,50  &    44,69   &   179,31                \\
+     & 5,23      &    14,08  &    48,99   &   179,84                \\
+     & 5,20      &    13,08  &    48,35   &   178,99                \\ \cline{1-6}
 4    & 8,26      &    10,67  &    27,85   &    94,49   &    193,99  \\
      & 9,31      &    10,66  &    28,50   &    93,18   &    203,01  \\
      & 9,34      &    11,06  &    27,15   &    97,29   &    201,75  \\ \cline{1-6}
