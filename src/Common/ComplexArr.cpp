@@ -8,14 +8,31 @@
 #include <complex>
 #include <valarray>
 #include <vector>
+#include <algorithm>
 
-
-
-
+#ifdef _WIN32
 bool operator <(const Complex &a, const Complex &b){
 	return a.real() < b.real();
 }
+#endif
 
+Complex getLargestElement(ComplexArr arr){
+	Complex retVal;
+	for (auto& el : arr) {
+		if(el.real() > retVal.real()){
+			retVal = el;
+		}
+	}
+	return retVal;
+}
+
+ComplexArr powArray(ComplexArr arr, float exponent){
+	ComplexArr retVal(arr.size());
+	for (size_t i = 0; i < arr.size(); i++) {
+		retVal[i] = std::pow(arr[i], exponent);
+	}
+	return retVal;
+}
 
 ComplexArr squareArray(ComplexArr arr){
 	ComplexArr retVal;
@@ -101,7 +118,7 @@ std::vector<float> getAmplitude(ComplexArr arr){
 	for (size_t i = 0; i < arr.size(); i++) {
 		float real = arr[i].real();
 		float imag = arr[i].imag();
-		ret[i] = std::sqrtf(real*real + imag*imag);
+		ret[i] = (float)std::sqrt(real*real + imag*imag);
 	}
 	return ret;
 }
@@ -112,7 +129,7 @@ std::vector<float> getPhase(ComplexArr arr){
 	for (size_t i = 0; i < arr.size(); i++) {
 		float real = arr[i].real();
 		float imag = arr[i].imag();
-		ret[i] = std::atan2f(imag, real);
+		ret[i] = (float)std::atan2(imag, real);
 	}
 	return ret;
 }
@@ -149,7 +166,7 @@ ComplexArr getZeros(size_t length){
 
 
 ComplexArr normalise(ComplexArr arr){
-	Complex max = arr.max();
+	Complex max = getLargestElement(arr);
 	return (arr / max);
 }
 
@@ -165,7 +182,7 @@ std::vector<float> writeComplexToFloat(ComplexArr arr){
 
 
 void printArr(ComplexArr arr){
-	for (int i = 0; i < arr.size(); i++) {
+	for (size_t i = 0; i < arr.size(); i++) {
 		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
 	}
 	
@@ -173,7 +190,7 @@ void printArr(ComplexArr arr){
 }
 
 void printArr(ComplexArr arr, int start, int ammount){
-	for (int i = start; i < start+ammount && i<arr.size(); i++) {
+	for (size_t i = start; i < (size_t)start+ammount && i<arr.size(); i++) {
 		printf("(%f,%fi) ", arr[i].real(), arr[i].imag());
 	}
 	
@@ -187,14 +204,13 @@ ComplexArr getWave(float freq, size_t size, float sampleRate){
 	x = Complex(2.f*float(M_PI)*freq,0.f)*x;
 
 	//x = std::sin(x);
-	for (int i = 0; i < x.size(); i++) {
+	for (size_t i = 0; i < x.size(); i++) {
 		x[i] = std::sin(x[i]);
 	}
 
 	return x;
 }
 
-#include <algorithm>
 
 ComplexArr mirrorArray(ComplexArr arr){
 	ComplexArr lower = arr[std::slice(0, arr.size()/2, 1)];

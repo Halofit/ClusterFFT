@@ -16,11 +16,11 @@
 
 #include <mpi.h>
 #ifdef _WIN32
-	#include "sndfile.h"
+	#include "../Common/sndfile.h"
 #else
 	#include <sndfile.h>
 #endif
-#include "ComplexArr.h"
+#include "../Common/ComplexArr.h"
 
 //#define LOGGING
 #ifdef LOGGING
@@ -250,7 +250,7 @@ int main(int argc, char* argv[]){
 		break;
 
 		case(FFTFun::FREQ_SPEED) :{
-			x = shiftFreqs(x, size_t(functMagn));
+			x = shiftFreqs(x, functMagn);
 		}
 		break;
 

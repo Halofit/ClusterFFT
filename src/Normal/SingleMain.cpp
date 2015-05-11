@@ -15,7 +15,7 @@
 
 #include "sndfile.h"
 #include "gnuplotCall.h"
-#include "ComplexArr.h"
+#include "../Common/ComplexArr.h"
 
 #define LOGGING
 #ifdef LOGGING
