@@ -10,7 +10,7 @@ Med slednje spadajo hitrost in latenca povezave od naprave uporabnika (end point
 
 Kot omenjeno zgoraj se na spletu najdejo seznami spletnih sistemov, ki jih lahko uporabniki med seboj primerjajo. Primerjajo lahko rezultate za razliène parametre kot so hitrost procesorja pri raèunanju s plavajoèo vejico ali celimi števili, hitrost prenosa pri branju podatkov oz. pisanju na pomnilnih enotah, hitrost prenosa podatkov lokalno znotraj oblaène storitve in drugo. Pri testiranju teh parametrov se lahko uporabi razlièna orodja kot so SPEC CPU 2006, Test Harness, TeraSort, Geekbench in še mnogo drugih. Pri sami izbiri programov se moramo osredotoèiti tudi na bremena, ki jih lahko s posameznim programom definiramo in tako testiramo željene parametre. Kljuèen kriterij poleg kakovosti storitev in definiranje bremen je tudi cena. Zaželjeni so prosto dostopni oz. zastonjski progami. 
 
-Pri testiranju spletnih strežnikov (S1) uporabnika navadno zanima število zahtev, ki jih strežnik obdela, latenca oz. èas odziva strežnika za novo povezavo ali zahtevek, in kolièina prenesenih podatkov v sekundi, glede na razliène parametre (velikost, shranjevanje v predpomnilnik, razlièna pasovna širina). Za izvajanje stresnih testov se na spletu nahaja veliko orodij, ki lahko pridejo v pomoè (Apachech, Apache JMeter, Curl-loader, OpenSTA â€¦). 
+Pri testiranju spletnih strežnikov (S1) uporabnika navadno zanima število zahtev, ki jih strežnik obdela, latenca oz. èas odziva strežnika za novo povezavo ali zahtevek, in kolièina prenesenih podatkov v sekundi, glede na razliène parametre (velikost, shranjevanje v predpomnilnik, razlièna pasovna širina). Za izvajanje stresnih testov se na spletu nahaja veliko orodij, ki lahko pridejo v pomoè (Apachech, Apache JMeter, Curl-loader, OpenSTA). 
 
 \subsection{Znanje}
 
@@ -94,48 +94,34 @@ Vse teste smo ponovili trikrat.
 \begin{table}[h]
 \begin{tabular}{l|cccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    & 6,36      &    21,85  &    86,11   &   359,54   &            \\
-     & 6,23      &    20,70  &    85,98   &   361,90   &            \\
-     & 6,48      &    21,73  &    84,97   &   363,97   &            \\ \cline{1-6}
-2    & 5,27      &    14,50  &    44,69   &   179,31   &            \\
-     & 5,23      &    14,08  &    48,99   &   179,84   &            \\
-     & 5,20      &    13,08  &    48,35   &   178,99   &            \\ \cline{1-6}
+1    & 6,36      &    21,85  &    86,11   &   359,54               \\
+     & 6,23      &    20,70  &    85,98   &   361,90               \\
+     & 6,48      &    21,73  &    84,97   &   363,97               \\ \cline{1-6}
+2    & 5,27      &    14,50  &    44,69   &   179,31               \\
+     & 5,23      &    14,08  &    48,99   &   179,84               \\
+     & 5,20      &    13,08  &    48,35   &   178,99               \\ \cline{1-6}
 4    & 8,26      &    10,67  &    27,85   &    94,49   &    193,99  \\
      & 9,31      &    10,66  &    28,50   &    93,18   &    203,01  \\
-     & 9,34      &    11,06  &    27,15   &    97,29   &    201,75  \\ \cline{1-6}
+     & 9,34      &    11,06  &    27,15   &    97,29   &    201,75  \\
 \end{tabular}
 \end{table}
 
 \begin{table}[h]
 \begin{tabular}{l|cccc}
 RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
-1    & 21,85     & 102,38     &            &             \\
-     & 20,70     &            &            &             \\
-     & 21,73     &            &            &             \\ \cline{1-5}
-2    & 14,50     &  70,95     & 126,58     &             \\
-     & 14,08     &  70,32     & 150,61     &             \\
-     & 13,08     &  71,55     & 129,25     &             \\ \cline{1-5}
-4    & 10,67     &  55,44     &  98,99     &             \\
-     & 10,66     &  55,93     &  95,94     &             \\
-     & 11,06     &  55,80     &  95,94     &             \\ \cline{1-5}
+1    & 21,85     & 102,38     & 208,68                   \\
+     & 20,70     & 104,35     & 203,89                   \\
+     & 21,73     & 103,75     & 218,35                   \\ \cline{1-5}
+2    & 14,50     &  70,95     & 126,58                   \\
+     & 14,08     &  70,32     & 150,61                   \\
+     & 13,08     &  71,55     & 129,25                   \\ \cline{1-5}
+4    & 10,67     &  55,44     &  98,99                   \\
+     & 10,66     &  55,93     &  95,94                   \\
+     & 11,06     &  55,80     &  95,94                   \\
 \end{tabular}
 \end{table}
-
-
-
-
-
-
-
-
-
-
-
 
 Razlika med 2 in 3 vozlišèi je premajhna, da bi lahko sklepali na pohitritev. Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti.
 
 Ker za dovolj velik $n$ velja $n*log(n) > n*log(n/m)*m$, je hitrost reševanja problem veèja, èe rešujemo veè manjših problem, kot enega velikega. To je razlog, da ne porazdeljujemo po gruèi po drevesu razcepa podatkov, ki ga izvaja FFT, ampak razdelimo vse podatke na $m$ delov in nato odbelujemo vsakega posebej, pri èemer je $m$ število raèunalnikov v gruèi. To je slaba rešitev za zelo velik $m$ ali zelo majhne zahtevke, saj bi se lahko poznala izguba kvalitete zvoka, ki jo to prinese. Razlika se na normalnih zahtevkih in našem $m$ sicer ne pozna. Takšen pristop se uporablja tudi v praksi, predvsem kadar se izvaja transformacije v realnem èasu (sproti).
 
-\section{Naèrt za naprej}
-
-Še vedno nismo opravili vseh meritev, ki jih nameravamo. V tem tednu bomo izvajali eksperimente z razlièno velikimi bremeni in v razliènih okolišèinah. Za rezultat meritev bomo upoštevali najmanjšo, najveèjo in povpreèno meritev.
