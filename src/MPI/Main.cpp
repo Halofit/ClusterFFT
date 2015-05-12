@@ -201,18 +201,25 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-
-
+	
+	
 	MPI_Bcast(sendcnts, mpi.size, MPI_INT, mpi.MASTER, MPI_COMM_WORLD);
 	
 	std::vector<float> recvBuf(sendcnts[mpi.rank]);
 	
+	//Start timer
+	MPI_Barrier(MPI_COMM_WORLD);
+	double scatterTimeStart = MPI_Wtime();
 	
 	//Not sure if this will segfault due to first argument
 	MPI_Scatterv(w.data.data(), sendcnts, disps,
                 MPI_FLOAT, recvBuf.data(), sendcnts[mpi.rank],
                 MPI_FLOAT,
                 mpi.MASTER, MPI_COMM_WORLD);
+	
+	//End timer
+	MPI_Barrier(MPI_COMM_WORLD);
+	double scatterTimeEnd = MPI_Wtime();
 	
 	
 	ComplexArr x;
@@ -266,9 +273,17 @@ int main(int argc, char* argv[]){
 
 	recvBuf = writeComplexToFloat(x);
 
+	//Start timer
+	MPI_Barrier(MPI_COMM_WORLD);
+	double gatherTimeStart = MPI_Wtime();
+	
 	MPI_Gatherv(recvBuf.data(), sendcnts[mpi.rank], MPI_FLOAT,
                 w.data.data(), sendcnts, disps,
                 MPI_FLOAT, mpi.MASTER, MPI_COMM_WORLD);
+	
+	//Start timer
+	MPI_Barrier(MPI_COMM_WORLD);
+	double gatherTimeEnd = MPI_Wtime();
 	
 	if(mpi.rank == 0){
 		//Prepare data for output
@@ -276,7 +291,12 @@ int main(int argc, char* argv[]){
 		wOut.info = w.info;
 		wOut.data = w.data;
 		saveWavData(outFile, wOut);
+		double scatterTime = scatterTimeEnd - scatterTimeStart;
+		double gatherTime = gatherTimeEnd - gatherTimeStart;
 		double time = getCounter();
+		printf("\nScatter time: %fs\n", scatterTime);
+		printf("Gather time: %fs\n", gatherTime);
+		printf("Communication time %fs\n", scatterTime+gatherTime);
 		printf("Time: %fms\n\n", time);
 	}
 	
