@@ -89,7 +89,10 @@ Mertive smo izvedli na 1, 2 in 4 raèunalnikih v gruèi. Izvedli smo teste z enim 
 
 Vse teste smo ponovili trikrat.  
 
-\subsection{Izmerjeni èasi: razlièno velike datoteke}
+%%======================== konst num = 1, var size =======================
+%%============================= èas zahtevka =============================
+
+\subsection{Izmerjeni èasi: 1 datoteka, razliène velikosti datoteke}
 
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
@@ -97,14 +100,111 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 1    & 6,36      &    21,85  &    86,11   &   359,54                \\
      & 6,23      &    20,70  &    85,98   &   361,90                \\
      & 6,48      &    21,73  &    84,97   &   363,97                \\ \cline{1-6}
+
 2    & 5,27      &    14,50  &    44,69   &   179,31                \\
      & 5,23      &    14,08  &    48,99   &   179,84                \\
      & 5,20      &    13,08  &    48,35   &   178,99                \\ \cline{1-6}
+
 4    & 8,26      &    10,67  &    27,85   &    94,49   &    193,99  \\
      & 9,31      &    10,66  &    28,50   &    93,18   &    203,01  \\
      & 9,34      &    11,06  &    27,15   &    97,29   &    201,75  \\
 \end{tabular}
 \end{table}
+
+
+
+%%============================= overhead =============================
+
+\subsection{Izmerjeni èasi prenosa podatkov in režije (angl. \textit{overhead}) v sekundah: 1 datoteka, razliène velikosti datoteke}
+
+\begin{table}[h]
+\begin{tabular}{l|ccccc}
+RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
+1    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+
+2    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+
+4    &  0,66     &  1,59     &  5,25      &  4,35      &  17,96     \\
+     &  0,46     &  4,65     &  7,90      &  8,32      &  20,09     \\
+     &  0,78     &  2,06     &  8,32      &  7,39      &  40,61     \\ %% idelno ponoviti tretjo meritev za 180 - net zajbava
+\end{tabular}
+\end{table}
+
+%èas fftja v sekundah
+%1,11		4,56		20,40	      85,25
+%1,07		4,50		20,05
+%1,06		4,63		19,45	
+
+%%================================ hitrost raèunanja ============================= bajti na fft
+
+\subsection{Izmerjena hitrost obdelave podatkov v kB/s: 1 datoteka, razliène velikosti datoteke}
+
+\begin{table}[h]
+\begin{tabular}{l|ccccc}
+RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
+1    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+
+2    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+
+4    &  79,20    &  96,80    &  86,46     &  59,17     &  88,68     \\
+     &  82,61    &  98,04    &  87,99     &  63,85     &  90,70     \\
+     &  83,39    &  95,39    &  90,70     &  62,09     &  78,06     \\
+\end{tabular}
+\end{table}
+
+%%================================ hitrost raèunanja ============================= bajti na service
+
+\subsection{Izmerjena hitrost obdelave podatkov v kB/s: 1 datoteka, razliène velikosti datoteke}
+
+\begin{table}[h]
+\begin{tabular}{l|ccccc}
+RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
+1    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+
+2    &           &           &            &                         \\
+     &           &           &            &                         \\
+     &           &           &            &                         \\ \cline{1-6}
+ 
+4    &  15,63    &  41,73    &  58,32     & 53,73      &  78,56     \\
+     &  16,35    &  32,73    &  55,61     & 55,46      &  79,71     \\
+     &  15,30    &  39,92    &  54,59     & 54,87      &  64,08     \\
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%====================== konst size = 5s, var num =======================
+%%============================= èas zahtevka =============================
+
+\subsection{Izmerjeni èasi izvajanja celotnega zahtevka: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
 \begin{table}[h]
 \begin{tabular}{l|cccc}
@@ -112,14 +212,100 @@ RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
 1    & 21,85     & 102,38     & 208,68                   \\
      & 20,70     & 104,35     & 203,89                   \\
      & 21,73     & 103,75     & 218,35                   \\ \cline{1-5}
+
 2    & 14,50     &  70,95     & 126,58                   \\
      & 14,08     &  70,32     & 150,61                   \\
      & 13,08     &  71,55     & 129,25                   \\ \cline{1-5}
+
 4    & 10,67     &  55,44     &  98,99                   \\
      & 10,66     &  55,93     &  95,94                   \\
      & 11,06     &  55,80     &  95,94                   \\
 \end{tabular}
 \end{table}
+
+
+
+
+
+
+%%============================= overhead =============================
+
+\subsection{Izmerjeni èasi: datoteka dolga 5s, razlièno število datotek v zahtevku}
+
+\begin{table}[h]
+\begin{tabular}{l|cccc}
+RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
+1    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+2    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+4    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\
+\end{tabular}
+\end{table}
+
+%èas fftja v sekundah
+%4    & 10,67     &  55,44     &  98,99                   \\
+%     & 10,66     &  55,93     &  95,94                   \\
+%     & 11,06     &  55,80     &  95,94                   \\
+
+
+%%================================ hitrost raèunanja =============================
+
+\subsection{Izmerjena hitrost obdelave podatkov v kB/s: datoteka dolga 5s, razlièno število datotek v zahtevku}
+
+\begin{table}[h]
+\begin{tabular}{l|cccc}
+RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
+1    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+2    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+4    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Razlika med 2 in 3 vozlišèi je premajhna, da bi lahko sklepali na pohitritev. Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti.
 
