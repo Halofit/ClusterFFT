@@ -235,27 +235,27 @@ RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
 \begin{table}[h]
 \begin{tabular}{l|cccc}
 RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
-1    &           &            &                          \\
-     &           &            &                          \\
-     &           &            &                          \\ \cline{1-5}
+1    &   -x      &            &                          \\
+     &   -x      &            &                          \\
+     &   -x      &            &                          \\ \cline{1-5}
 
-2    &           &            &                          \\
-     &           &            &                          \\
-     &           &            &                          \\ \cline{1-5}
+2    &   -x      &            &                          \\
+     &   -x      &            &                          \\
+     &   -x      &            &                          \\ \cline{1-5}
 
-4    &           &            &                          \\
-     &           &            &                          \\
-     &           &            &                          \\
+4    &   -x      &   21,44    &                          \\
+     &   -x      &    7,53    &                          \\
+     &   -x      &            &                          \\
 \end{tabular}
 \end{table}
 
 %èas fftja v sekundah
-%4    & 10,67     &  55,44     &  98,99                   \\
-%     & 10,66     &  55,93     &  95,94                   \\
-%     & 11,06     &  55,80     &  95,94                   \\
+%4    &           &  28,82     &                          \\
+%     &           &  25,18     &                          \\
+%     &           &            &                          \\
 
 
-%%================================ hitrost raèunanja =============================
+%%================================ hitrost raèunanja ============================= FFT
 
 \subsection{Izmerjena hitrost obdelave podatkov v kB/s: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
@@ -270,13 +270,32 @@ RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
      &           &            &                          \\
      &           &            &                          \\ \cline{1-5}
 
-4    &           &            &                          \\
-     &           &            &                          \\
+4    &           &  76,54     &                          \\
+     &           &  87,61     &                          \\
      &           &            &                          \\
 \end{tabular}
 \end{table}
 
+%%================================ hitrost raèunanja ============================= seervice
 
+\subsection{Izmerjena hitrost obdelave podatkov v kB/s: datoteka dolga 5s, razlièno število datotek v zahtevku}
+
+\begin{table}[h]
+\begin{tabular}{l|cccc}
+RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
+1    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+2    &           &            &                          \\
+     &           &            &                          \\
+     &           &            &                          \\ \cline{1-5}
+
+4    &           &  29,97     &                          \\
+     &           &  39,68     &                          \\
+     &           &            &                          \\
+\end{tabular}
+\end{table}
 
 
 
