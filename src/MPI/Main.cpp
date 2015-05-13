@@ -281,7 +281,7 @@ int main(int argc, char* argv[]){
                 w.data.data(), sendcnts, disps,
                 MPI_FLOAT, mpi.MASTER, MPI_COMM_WORLD);
 	
-	//Start timer
+	
 	MPI_Barrier(MPI_COMM_WORLD);
 	double gatherTimeEnd = MPI_Wtime();
 	
