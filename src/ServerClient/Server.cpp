@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string.h>
 #include <pthread.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #ifdef __linux__ 
 #include <sys/time.h>
@@ -58,7 +60,7 @@ double dtime(){
 #define BUFFER_SIZE 4096
 #define CLIENT_LIMIT 2
 #define SIZE_FILE_SIZE 32 
-
+#define TIMEOUT 640
 // Global variable for counting clients
 int clientCount;
 int fileCount;
@@ -71,6 +73,7 @@ pthread_mutex_t lockFile = PTHREAD_MUTEX_INITIALIZER;
 struct clientInfo{
 	int childID;
 	int clientSock;
+	double runTime;
 } typedef clientInfo;
 
 
@@ -99,9 +102,9 @@ void server_exit(int listenerSock){
 	pthread_exit(NULL);
 	if (listenerSock > 0)
 		closesocket(listenerSock);
-	#ifdef _WIN32
+#ifdef _WIN32
 	WSACleanup();
-	#endif
+#endif
 }
 
 
@@ -159,10 +162,9 @@ int send_file(int clientSock, char *filename){
 	// Header - Send file's size
 	char size[SIZE_FILE_SIZE];
 	sprintf(size, "%d", fileSize);
-	
-	
+
+
 	nBytes = send(clientSock, size, SIZE_FILE_SIZE, 0);
-	printf("POSLANO: %d VELIKOST: %d VELIKOST I:%d\n",nBytes,size, fileSize);
 	if (nBytes <= 0)
 		return socket_error();
 
@@ -181,7 +183,7 @@ int send_file(int clientSock, char *filename){
 
 	int read = 0;
 	while (!feof(f)){
-//		printf("FREAD\n");
+		//		printf("FREAD\n");
 		// Read bytes to buffer
 		read = fread(buff, 1, BUFFER_SIZE, f);
 		if (read <= 0){
@@ -190,9 +192,7 @@ int send_file(int clientSock, char *filename){
 		}
 
 		// Send bytes from buffer
-//		printf("SEND %d\n",read);
 		nBytes = send(clientSock, buff, read, 0);
-//		printf("AFTERSEND %d\n",nBytes);
 		if (nBytes <= 0){
 			socket_error();
 			break;
@@ -340,7 +340,8 @@ void *client_handle(void *s){
 	clientInfo *c = (clientInfo*)s;
 	int nBytes;
 	int clientSock = (int)c->clientSock;
-	
+	double startTime = (double)c->runTime;
+
 	char fun[20];
 	std::string function;
 	function.reserve(20);
@@ -348,7 +349,11 @@ void *client_handle(void *s){
 	char mag[5];
 	std::string magnitude;
 	magnitude.reserve(5);
-	
+
+	char nrpis;
+	std::string rpis;
+	rpis.reserve(1);
+
 	// Receive number of files or end client session
 	char numFilesChar;
 	nBytes = recv(clientSock, &numFilesChar, sizeof(char), 0);
@@ -357,26 +362,36 @@ void *client_handle(void *s){
 		close_thread(clientSock);
 		return NULL;
 	}
+
 	// Receive name of function
 	nBytes = recv(clientSock, fun, 20, 0);
-	if(nBytes < 0){
+	if (nBytes < 0){
 		socket_error();
 		close_thread(clientSock);
 		return NULL;
 	}
+
 	// Receive magnitude
 	nBytes = recv(clientSock, mag, 5, 0);
-	if(nBytes < 0){
+	if (nBytes < 0){
 		socket_error();
 		close_thread(clientSock);
 		return NULL;
 	}
-	
+
+	// Receive number of RPIs
+	nBytes = recv(clientSock, &nrpis, sizeof(char), 0);
+	if (nBytes < 0){
+		socket_error();
+		close_thread(clientSock);
+		return NULL;
+	}
+
 	function = fun;
 	magnitude = mag;
+	rpis = nrpis;
 
 	int numFiles = (int)numFilesChar;
-
 	// List of file names
 	char **listOfFiles = (char **)malloc(numFiles*sizeof(char*));
 	char **listOfFilesOUT = (char **)malloc(numFiles*sizeof(char*));
@@ -392,12 +407,18 @@ void *client_handle(void *s){
 	}
 	double endReceiving = dtime();
 	printf("Receiving Time: %0.4f sec\n", (endReceiving - startReceiving));
-	printf("\n =============================== FFT OUTPUT =============================== \n");
+	printf("\n=============================== FFT OUTPUT =============================== \n");
 	// DO SOME HARD WORK - FFT
-	int result;
+	//int result;
 	double startFFT = dtime();
+	int stat;
+	pid_t pid;
+	char temp;
+	int wpid;
 	for (i = 0; i < numFiles; i++){
-		std::string command = "mpiexec -machinefile machinefile -n 4 ~/RunFFT/clusterFFT.out -f ";
+		std::string command = "mpiexec -machinefile machinefile -n ";
+		command += rpis;
+		command += " ~/RunFFT/clusterFFT.out -f ";
 		command += function;
 		command += " -m ";
 		command += magnitude;
@@ -405,17 +426,46 @@ void *client_handle(void *s){
 		command += listOfFiles[i];
 		command += " -o ";
 		command += listOfFilesOUT[i];
-		result = system(command.c_str());
+		//result = system(command.c_str());
+		//const char *cmd = command.c_str();
+		if ((pid = fork()) == 0) {
+			execl("/bin/sh", "sh", "-c", command.c_str(), (char *)0);
+			_exit(127);
+		}
+		if (pid == -1) {
+			stat = -1; /* errno comes from fork() */
+		}
+		else {
+			temp = '0';
+			int waittime = 0;
+			int Stat;
+			do {
+				wpid = waitpid(pid, &stat, WNOHANG);
+				if (wpid == 0) {
+					if (waittime < TIMEOUT) {
+						sleep(1);
+						waittime++;
+						// Send ACK
+						send(clientSock, &temp, 1, 0);
+					}
+					else {
+						// Timeout
+						printf("Killing child process\n");
+						kill(pid, SIGKILL);
+					}
+				}
+			} while (wpid == 0 && waittime <= TIMEOUT);
+		}
 	}
-	if (WIFSIGNALED(result) && (WTERMSIG(result) == SIGINT || 
-WTERMSIG(result) == SIGQUIT)){
-		printf("ERROR System returned: %d", result);
+	if (WIFSIGNALED(stat) && (WTERMSIG(stat) == SIGINT || WTERMSIG(stat) == SIGQUIT)){
+		printf("ERROR System returned: %d", stat);
 		exit(1);
 	}
+	temp = '1';
+	send(clientSock, &temp, 1, 0);
 	double endFFT = dtime();
-	printf("\n ========================================================================== \n");
-	printf("FFT Time: %0.4f sec\n", (endFFT - startFFT));
-	printf("\n");
+	printf("\n========================================================================== \n");
+
 
 	// Send all files back
 	for (i = 0; i < numFiles; i++){
@@ -432,6 +482,18 @@ WTERMSIG(result) == SIGQUIT)){
 			printf("ERROR while removing output file! (%s)\n", listOfFilesOUT[i]);
 	}
 
+	nBytes = recv(clientSock, fun, 1, 0);
+	if (nBytes == 0){
+		printf("Connection closed.\n");
+	}
+
+	double endTime = dtime();
+	printf("\n====================== RESULTS ======================\n");
+	printf("FFT Time: %0.4f sec\n", (endFFT - startFFT));
+	printf("Time of sending/receiving: %0.4f sec\n", ((endTime - startTime) - (endFFT - startFFT)));
+	printf("Time passed (ALL): %0.4f sec\n", (endTime - startTime));
+	printf("=====================================================\n");
+
 	// Clean up
 	for (i = 0; i < numFiles; i++){
 		free(listOfFiles[i]);
@@ -439,6 +501,7 @@ WTERMSIG(result) == SIGQUIT)){
 	}
 	free(listOfFiles);
 	free(listOfFilesOUT);
+
 	// Close thread
 	close_thread(clientSock);
 	return NULL;
@@ -483,9 +546,9 @@ int main(int argc, char **argv){
 
 	int optval = 1;
 	socklen_t optlen = sizeof(optval);
-	if(setsockopt(listenerSock,SOL_SOCKET,SO_KEEPALIVE, &optval, optlen) < 0){
+	if (setsockopt(listenerSock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0){
 		server_exit(listenerSock);
-		errorexit(listenerSock,"ERROR on binding.");
+		errorexit(listenerSock, "ERROR on binding.");
 	}
 
 	// Initialize socket structure
@@ -501,34 +564,36 @@ int main(int argc, char **argv){
 		server_exit(listenerSock);
 		errorexit(listenerSock, "ERROR on binding.");
 	}
-	
-	
-	
+
+
+
 	// Starts listening
 	listen(listenerSock, CLIENT_LIMIT);
 	clilen = sizeof(cliAddr);
 	printf("Starts listening....\n");
 	while (1){
 
+
 		// Create connection
 		clientSock = accept(listenerSock, (struct sockaddr *)&cliAddr, &clilen);
-		
-		
+		double runTime = dtime();
+
 		if (clientSock < 0){
 			server_exit(listenerSock);
 			errorexit(clientSock, "ERROR on accept client.");
 		}
-		
-		
-		if (setsockopt(clientSock, SOL_SOCKET,SO_KEEPALIVE, &optval,optlen) < 0){
+
+
+		if (setsockopt(clientSock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0){
 			server_exit(listenerSock);
-			errorexit(clientSock,"ERROR on set client.");
+			errorexit(clientSock, "ERROR on set client.");
 		}
 
 		// Creates new client thread and arguments
 		pthread_t clientThread;
 		clientInfo args;
 		args.clientSock = clientSock;
+		args.runTime = runTime;
 
 		/*
 		*  Lock (reading client_count) and check if CLIENT_LIMIT is exceeded
@@ -542,6 +607,7 @@ int main(int argc, char **argv){
 			pthread_mutex_unlock(&lockClient);
 			continue;
 		}
+
 		pthread_mutex_unlock(&lockClient);
 
 		// Create thread and serve client 
