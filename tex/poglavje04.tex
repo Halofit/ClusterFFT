@@ -27,14 +27,14 @@ Sistem, ki ga bomo testirali, smo izbrali na podlagi svojega znanja in zanimanja
 \subsection{Izbira ciljnih sistemov}
 
 Za ciljni sistem bi lahko izbrali kakšnega od veèjih ponudnikov oblaènih storitev kot so Google Cloud, Amazon web service, Microsoft Azure, lahko tudi kakšnega manjšega, naprimer Rackspace. Veèina teh ponudnikov ima omejene zastonjska testna obdobja, med katerimi bi lahko izvedli meritve.
-Ker imamo dostop do raèunalnika Raspberry Pi \footnote{http://www.raspberrypi.org/} in predvsem zastonjskih verzij oblaènih storitev, nas zanima primerjava med temi platformami. Raspberry Pi je raèunalnik, ki stane okrog 30 evrov in ne porabi praktièno niè elektrike, v zameno pa ponuja primerno majhno zmogljivost. Neplaèljive oblaène storitve so moèno èasovno omejene ali pa ponujajo prav tako zelo majhne zmogljivosti.
+Ker imamo dostop do raèunalnika Raspberry Pi \footnote{http://www.raspberrypi.org/} in predvsem zastonjskih verzij oblaènih storitev, nas zanima primerjava med temi platformami. Raspberry Pi je raèunalnik, ki stane okrog 30 evrov in ne porabi praktièno niè elektrike, v zameno pa ponuja primerno majhno zmogljivost. Ne plaèljive oblaène storitve so moèno èasovno omejene ali pa ponujajo prav tako zelo majhne zmogljivosti.
 Zaradi naših predznanj lahko storitev za strežnik, katerega ustroj in delovanje poznamo, bolje optimiziramo, kot oblaèno storitev, kar je prav tako vredno preveriti.
 
-Ker pa je implementacija optimizirane storitve in postavitev lastne gruèe relativno zahtevno opravilo, mi pa imamo na voljo omejen èas, smo se odloèili za testiranje zmogljivosti gruèe raèunalnikov Raspberry Pi. Le ti so se v zadnjem èasu zaradi nizke cene na mnogih podroèjih raèunalništva zaèeli uporabljati. Nas zanima, ali so raèunalniki takšnega tipa primerni tudi za uporabo na podroèjih, ki zahtevajo raèunsko moè. Na podlagi izmerjenih rezultatov lahko primerjamo zmogljivost z drugaènimi sistemi, na katerih so meritve že opravljene. Prav tako lahko nadaljujemo raziskovanje na tem podroèju z poskusom optimizacije enake storitve na drugaènem sistemu opravimo v prihodnosti.
+Ker pa je implementacija optimizirane storitve in postavitev lastne gruèe relativno zahtevno opravilo, mi pa imamo na voljo omejen èas, smo se odloèili za testiranje zmogljivosti gruèe raèunalnikov Raspberry Pi. Le ti so se v zadnjem èasu zaradi nizke cene na mnogih podroèjih raèunalništva zaèeli uporabljati. Nas zanima, ali so raèunalniki takšnega tipa primerni tudi za uporabo na podroèjih, ki zahtevajo raèunsko moè. Na podlagi izmerjenih rezultatov lahko primerjamo zmogljivost z drugaènimi sistemi, na katerih so meritve že opravljene. Prav tako lahko nadaljujemo raziskovanje na tem podroèju z poskusom optimizacije enake storitve na drugaènem sistemu v prihodnosti.
 
 \subsection{Breme in cilj primerjave}
 
-Za storitev, ki jo bo naša gruèa ponujala, smo izbrali manipulacijo nad frekvenènim spektrom avdio datotek. To pomeni, da smo implementirali porazdeljen algoritem FFT, ki pretvori datoteko iz vzorènega prostora v frekveèni spekter, nato nad temopravimo preprosto operacijo naprimer zamik v višje frekvence, nato pa z inverznim FFT naredimo spet datoteko v vzorènem prostoru.
+Za storitev, ki jo bo naša gruèa ponujala, smo izbrali manipulacijo nad frekvenènim spektrom avdio datotek. To pomeni, da smo implementirali porazdeljen algoritem FFT, ki pretvori datoteko iz vzorènega prostora v frekveèni spekter, nato nad tem opravimo preprosto operacijo, na primer zamik v višje frekvence, nato pa z inverznim FFT spet naredimo datoteko v vzorènem prostoru.
 
 Bremena so tako razlièno velike zvoène datoteke. Ker naš spletni strežnik, ki to storitev ponuja, sprejme eno ali veè datotek, testiramo tudi izvajanje veèih instanc algoritma hkrati.
 
@@ -42,12 +42,12 @@ Cilj primerjave je ugotoviti, ali je raèunalnik Raspberry Pi primeren za postavi
 
 \section{Sistem}
 
-Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè. Namenjena je zaganjanju porazdeljenih programov. Trenutno sta v mrežo povezana dva raèunalnika Raspberry Pi, model 1B in model 1B+. Povezani so v gruèo s pomoèjo knjižnjice MPI. Do njega imamo SSH dostop tudi z zunanjega omrežja. Storitev je dostopna prek strežnika, ki smo ga implementirali sami.
+Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè. Namenjena je zaganjanju porazdeljenih programov. V mrežo smo povezali štiri raèunalnike Raspberry Pi, model 1B, tri modele 1B+. Povezani so v gruèo s pomoèjo knjižnjice MPI\footnote{Message Passing Interface, knjižnjica za medprocesno komunikacijo prek omrežja ali na lokalnem raèunalnikom}. Do njega imamo SSH dostop tudi z zunanjega omrežja. Storitev je dostopna prek strežnika, ki smo ga implementirali sami. Programska koda strežnika in implementacije algoritma FFT je v prilogi.
 
 \begin{figure}[H]
 \centerline{\includegraphics[scale=1.5]
 {4_shemaSistema.eps}}
-\caption{Shema sistema. Rdeèi kvadrati so raèunalniki Raspberry Pi, bledo rdeèih ni.}
+\caption{Shema sistema. Rdeèi kvadrati so raèunalniki Raspberry Pi.}
 \label{fig:gruca}
 \end{figure}
 
@@ -56,16 +56,16 @@ Do tega sistema dostopamo s klienti, ki so izven lokalnega omrežja. Gruèo uporab
 V zaèetku smo testirali dostop do gruèe od zunaj in delovanje sistema MPI na raèunalniku rpi1. To smo storili tako, da smo na njem poganjali z MPI implementiran algoritem porazdeljeni Quicksort (porazdeljeno hitro urejanje\footnote{http://en.wikipedia.org/wiki/Quicksort\#Parallelization}).
 
 Pri povezovanju Raspberry Pi-jev v gruèo smo uporabili Message Passing Interface(MPI), ki je standard za izmenjevanje sporoèil med raèunalniki oz. procesih v veè-raèunalniških sistemih, gruèah in delovnih postajah. Omogoèa komunikacijo toèka-toèka, skupinske komunikacije, spremljanje delovanja in tudi spreminjanje topologije za posamezen program. MPI je standard, ki omogoèa velik nabor funkcij, vendar za uporabo standarda ni potrebno poznati vseh. Pri sami komunikaciji raèunalniki med seboj uporabljajo implementacijo MPICH2 \cite{4Mpich},
-ki je zelo razširjena programska knjižnica poleg tega pa je enostavna za vzpostavitev in uporabo. Na vsakem raèunalniku je implementacija 
-MPICH2 in datoteka (machinefile)\cite{4Gruca} v kateri so zapisani IP naslovi sodelojoèih(sosednjih) lokalnih raèunalnikov, na katere se delo porazdeli.
+ki je zelo razširjena programska knjižnica, ki je enostavna za vzpostavitev in uporabo. Na vsakem raèunalniku je implementacija 
+MPICH2 in datoteka (machinefile)\cite{4Gruca}, v kateri so zapisani IP naslovi sodelojoèih (sosednjih) lokalnih raèunalnikov, na katere se delo porazdeli.
 
 Implementirali smo porazdeljeni algoritem FFT, ki se izvaja na gruèi. 
 
 \subsection{Implementacija storitve}
 
-V gruèo smo dodali veè raèunalnikov, da je prava gruèa, ne le en raèunalnik, na katerem teèe MPI. Raspberry Pi smo pripravili na delovanje v gruèi tako, da smo klonirali sliko datoteènega sistema. Potrebni so bili popravki v konfiguraciji omrežja in sprememba hostname-a vsakega raèunalnika. Po tem gruèa deluje brez težav.
+V gruèo smo dodali veè raèunalnikov, da je prava gruèa, ne le en raèunalnik, na katerem teèe MPI. Raspberry Pi smo pripravili na delovanje v gruèi tako, da smo klonirali sliko datoteènega sistema. Potrebni so bili popravki v konfiguraciji omrežja in sprememba hostname-a vsakega raèunalnika. Po tem je gruèa delovala brez težav.
 
-Implementirali smo storitev, ki zvoèno datoteko pretvori v binarno s pomoèjo knjižnjice \texttt{libsndfile}\cite{4Audio}. Testiranje smo izvedli z zvoèno datoteko, veliko približno 8 miljonov vzorcev (okrog 3 minute zvoka). Program na enem jedru teèe zelo poèasi. Ni se izpolnil strah, da bi algoritem tekel prehitro, da bi se ga izplaèalo poganjati na gruèi. Imeli smo nekaj težav s kodiranjem datoteke nazaj v zvoèno datoteko.
+Implementirali smo storitev, ki zvoèno datoteko pretvori v binarno s pomoèjo knjižnjice \texttt{libsndfile}\cite{4Audio}. Testiranje smo izvedli z zvoèno datoteko, veliko približno 8 miljonov vzorcev (okrog 3 minute zvoka, nekompresirana velikost je okrog 15MB). Program na enem jedru teèe zelo poèasi. Ni se izpolnil strah, da bi algoritem tekel prehitro, da bi se ga izplaèalo poganjati na gruèi. Imeli smo nekaj težav s kodiranjem datoteke nazaj v zvoèno datoteko.
 
 Pretvorbo izvajamo z rekurzivnim algoritmom FFT. Implementacija je zaradi uporabe razreda ValArray iz knjižnjice STL poèasna, èe je prevanjanje izvedeno z Microsoft Visual Studio prevajalnikom. Program, ki se izvaja na gruèi, na kateri teèe Linux (distribucija Arch Linux), je preveden s prevajalnikov gcc, ki se v tem primeru obnaša veliko bolje - koda se izvaja hitreje.
 
@@ -73,7 +73,7 @@ Pretvorbo izvajamo z rekurzivnim algoritmom FFT. Implementacija je zaradi uporab
 
 Implementirali smo strežnik, ki sprejema zahtevke z eno ali veè datotekami in nato odgovori. Implementirali smo tudi klienta, ki pošilja zahtevek z eno ali veè datotekami in sprejme odgovor strežnika.
 
-Program, ki izvaja manipulacije frekvenènega spektra, upošteva lastnosti hitre Fourierjeve transformacije in pravilno obdeluje zvok. Zavržemo del frekvenènega spektra, ki je zrcalna slika relevantnega dela. Transformacije, ki jih izvajamo na preostanku, so zato bolj smiselne in se obnašajo kot prièakovano.
+Program, ki izvaja manipulacije frekvenènega spektra, upošteva lastnosti hitre Fourierjeve transformacije in pravilno obdeluje zvok. Zavržemo del frekvenènega spektra, ki je zrcalna slika relevantnega dela. Transformacije, ki jih izvajamo na preostanku, so zato smiselne in se obnašajo kot prièakovano.
 
 \vspace{10pt}
 
@@ -83,9 +83,22 @@ Program, ki izvaja manipulacije frekvenènega spektra, upošteva lastnosti hitre F
 
 Naš problem predstavlja veliko raèunsko breme gruèi ampak relativno majhno breme za prenos podatkov prek omrežja. Na enem vozlišèu traja obdelovanje 5 sekund zvoka okrog 40 sekund. Algoritem je hitrostnega razreda $O(n * log(n))$.
 
-Zaradi tipa problema in bremena nas zanimajo èasi raèunanja (procesiranja na gruèi, wall-clock time, v odvisnosti od števila uporabljenih vozlišè in velikosti bremena), prenosa podatkov na in iz gruèe (latenca omrežja - èas prenosa je najbrž zanemarljiv, saj so datoteke velike med 1MB in 10MB), latence prenosa podatkov med vozlišèi v gruèi (da vidimo, ali je paralelizacija na gruèi primerna ali bi bilo bolje uporabljati paralelizacijo na veè jedrih ali podobni arhitekturi) in najveèje število datotek, ki jih lahko obdeluje hkrati, preden se gruèa ali deli nje sesujejo.
+Zaradi tipa problema in bremena nas zanimajo èasi raèunanja (procesiranja na gruèi, wall-clock time, v odvisnosti od števila uporabljenih vozlišè in velikosti bremena), prenosa podatkov na in iz gruèe (latenca omrežja - èas prenosa je najbrž zanemarljiv, saj so datoteke velike med 1MB in 15MB), latence prenosa podatkov med vozlišèi v gruèi (da vidimo, ali je paralelizacija na gruèi primerna ali bi bilo bolje uporabljati paralelizacijo na veè jedrih ali podobni arhitekturi) in najveèje število datotek, ki jih lahko obdeluje hkrati, preden se gruèa ali deli nje sesujejo.
 
-Mertive smo izvedli na 1, 2 in 4 raèunalnikih v gruèi. Izvedli smo teste z enim 5, 20, 60 in 180 sekund dolgo vhodno zvoèno datoteko in z 1, 5, 10 in 200 vhodnimi datotekami velikosti 5 sekund. Test 200 datotek po 5 sekund je namenjen temu, da gruèi zmanjka spomina in se sesuje.
+Izvajamo veè meritev:
+\begin{itemize}
+\item celoten èas izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika.
+\item èas izvajanja raèunskega dela storitve od klica programa FFT do konca njegovega izvajanja.
+\item èas prejemanja in pošiljanja podatkov prek omrežja.
+\item èas pošiljanja podatkov med raèunalniki v gruèi po lokalnem omrežju (klici funkcij MPI scatter in MPI gather.
+\item skupna hitrost obdelava podatkov v bajtih na sekundo.
+\end{itemize}
+
+Meritev èasa izvajanja raèunanja in meritev èasa prenosa podatkov med procesi smo ponovili tudi na raèunalniku s procesorjem Intel i5-3317U, s frekvenco ure 1,7GHz in 4GB DDR3 delovnega spomina in 3MB L3 cache-a. Pri tem smo program izvajali lokalno, brez strežnika. Rezultati nam dajo primerjavo med 
+
+Mertive smo izvedli na 1, 2 in 4 raèunalnikih v gruèi. Izvedli smo teste z enim 1, 5, 20, 60 in 180 sekund dolgo vhodno zvoèno datoteko in z 1, 5 in 10 vhodnimi datotekami velikosti 5 sekund. Posebej smo testirali še veè datotek po 180 sekund, s èimer smo uspeli sesuti gruèo.
+
+Zaradi zelo dolgega èasa izvajanja storitve za datoteke, dolge 180s, smo to meritev izvajali le na vseh 4 raèunalnikih v gruèi.
 
 Vse teste smo ponovili trikrat.  
 
@@ -93,17 +106,17 @@ Vse teste smo ponovili trikrat.
 %%============================= èas zahtevka =============================
 
 \subsection{Izmerjeni èasi: 1 datoteka, razliène velikosti datoteke}
-
+Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika.
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    & 6,36      &    21,85  &    86,11   &   359,54                \\
-     & 6,23      &    20,70  &    85,98   &   361,90                \\
-     & 6,48      &    21,73  &    84,97   &   363,97                \\ \cline{1-6}
+1    & 6,36      &    21,85  &    86,11   &   359,54   & -          \\
+     & 6,23      &    20,70  &    85,98   &   361,90   & -          \\
+     & 6,48      &    21,73  &    84,97   &   363,97   & -          \\ \cline{1-6}
 
-2    & 5,27      &    14,50  &    44,69   &   179,31                \\
-     & 5,23      &    14,08  &    48,99   &   179,84                \\
-     & 5,20      &    13,08  &    48,35   &   178,99                \\ \cline{1-6}
+2    & 5,27      &    14,50  &    44,69   &   179,31   &  -         \\
+     & 5,23      &    14,08  &    48,99   &   179,84   &   -        \\
+     & 5,20      &    13,08  &    48,35   &   178,99   &    -       \\ \cline{1-6}
 
 4    & 8,26      &    10,67  &    27,85   &    94,49   &    193,99  \\
      & 9,31      &    10,66  &    28,50   &    93,18   &    203,01  \\
