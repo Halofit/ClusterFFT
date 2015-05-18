@@ -12,7 +12,7 @@ MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
 NormalPos.right=1008
-NormalPos.bottom=257
+NormalPos.bottom=333
 Class=LaTeXView
 Document=poglavje04.tex
 
@@ -30,7 +30,7 @@ MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
 NormalPos.right=1008
-NormalPos.bottom=257
+NormalPos.bottom=333
 Class=LaTeXView
 Document=mro.tex
 

@@ -186,7 +186,7 @@ int main(int argc, char* argv[]){
 	startCounter();
 
 	WavData w;
-	int* sendcnts = (int*) malloc(sizeoddf(int)*mpi.size);
+	int* sendcnts = (int*) malloc(sizeof(int)*mpi.size);
 	int* disps = (int*) malloc(sizeof(int)*mpi.size);
 
 	if(mpi.rank == mpi.MASTER){
