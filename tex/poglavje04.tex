@@ -42,6 +42,14 @@ Cilj primerjave je ugotoviti, ali je raèunalnik Raspberry Pi primeren za postavi
 
 \section{Sistem}
 
+%%%%%%%%%%%%%%%%%%% FOTOGRAFIJA %%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htbf]
+\centerline{\includegraphics[scale=0.3]
+{4_foto.eps}}
+\caption{Fotografija gruèe. Na levi je 100 megabitno stikalo, na desni pa raèunalniki Raspberry Pi na pladnju.}
+\label{fig:fotog}
+\end{figure}
+
 Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè. Namenjena je zaganjanju porazdeljenih programov. V mrežo smo povezali štiri raèunalnike Raspberry Pi, model 1B, tri modele 1B+. Povezani so v gruèo s pomoèjo knjižnjice MPI\footnote{Message Passing Interface, knjižnjica za medprocesno komunikacijo prek omrežja ali na lokalnem raèunalnikom}. Do njega imamo SSH dostop tudi z zunanjega omrežja. Storitev je dostopna prek strežnika, ki smo ga implementirali sami. Programska koda strežnika in implementacije algoritma FFT je v prilogi.
 
 \begin{figure}[H]
@@ -106,7 +114,7 @@ Vse teste smo ponovili trikrat.
 %%============================= èas zahtevka =============================
 
 \subsection{Izmerjeni èasi: 1 datoteka, razliène velikosti datoteke}
-Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika.
+Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika. Meritve za 180 sekund dolgo zvoèno datoteko pri zmanjšanem številu elementov v gruèi nismo opravili zarada prevelikega èasa izvajanja.
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
@@ -133,13 +141,13 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+1    & 0,17      & 0,29      & 1,57       & 4,40       & -          \\
+     & 0,12      & 0,36      & 1,24       & 3,83       &  -         \\
+     & 0,12      & 0,35      & 1,09       & 3,82       &   -        \\ \cline{1-6}
 
-2    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+2    & 0,13      & 0,34      & 1,28       & 3,79       &  -         \\
+     & 0,12      & 0,34      & 1,47       & 4,16        &  -        \\
+     & 0,15      &  0,68     & 1,12       & 3,79         &  -       \\ \cline{1-6}
 
 4    &  0,66     &  1,59     &  5,25      &  4,35      &  17,96     \\
      &  0,46     &  4,65     &  7,90      &  8,32      &  20,09     \\
@@ -152,20 +160,20 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 %1,07		4,50		20,05
 %1,06		4,63		19,45	
 
-%%================================ hitrost raèunanja ============================= bajti na fft
+%%================================ hitrost raèunanja ==============================
 
-\subsection{Izmerjena hitrost obdelave podatkov v kB/s: 1 datoteka, razliène velikosti datoteke}
+\subsection{Izmerjen èas raèunananja FFT v sekundah: 1 datoteka, razliène velikosti datoteke}
 
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+1    & 4,71      & 18,16     & 82,15      & 357,95     &  -         \\
+     & 5,15      & 18,70     & 79,56      & 345,43      &  -        \\
+     & 4,26      & 19,90     & 82,18      & 348,29       &  -       \\ \cline{1-6}
 
-2    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+2    & 2,16      & 9,23      & 39,93      & 166,33    &  -         \\
+     & 2,15      & 9,64      & 41,16      & 171,19     &  -         \\
+     & 2,12      & 9,24      & 39,71      & 173,15      &  -        \\ \cline{1-6}
 
 4    &  79,20    &  96,80    &  86,46     &  59,17     &  88,68     \\
      &  82,61    &  98,04    &  87,99     &  63,85     &  90,70     \\
@@ -180,13 +188,13 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+1    & 9636      & 19781     & 20137      & 14434      & -          \\
+     & 10871     & 18099     & 20684      & 14948      &  -         \\
+     & 10872     & 18872     & 20245      & 14863      &   -        \\ \cline{1-6}
 
-2    &           &           &            &                         \\
-     &           &           &            &                         \\
-     &           &           &            &                         \\ \cline{1-6}
+2    & 14429     & 33045     & 38939      & 30263      &     -      \\
+     & 12404     & 30738     & 37932      & 29522       &   -       \\
+     & 14356     & 32215     & 39086      & 29255        & -        \\ \cline{1-6}
  
 4    &  15,63    &  41,73    &  58,32     & 53,73      &  78,56     \\
      &  16,35    &  32,73    &  55,61     & 55,46      &  79,71     \\
@@ -252,8 +260,8 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \subsection{Izmerjeni èasi izvajanja celotnega zahtevka: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
 \begin{table}[h]
-\begin{tabular}{l|cccc}
-RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
+\begin{tabular}{l|ccc }
+RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10                \\ \cline{1-5}
 1    & 21,85     & 102,38     & 208,68                   \\
      & 20,70     & 104,35     & 203,89                   \\
      & 21,73     & 103,75     & 218,35                   \\ \cline{1-5}
