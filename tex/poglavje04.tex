@@ -28,7 +28,7 @@ Sistem, ki ga bomo testirali, smo izbrali na podlagi svojega znanja in zanimanja
 
 Za ciljni sistem bi lahko izbrali kakšnega od veèjih ponudnikov oblaènih storitev kot so Google Cloud, Amazon web service, Microsoft Azure, lahko tudi kakšnega manjšega, naprimer Rackspace. Veèina teh ponudnikov ima omejene zastonjska testna obdobja, med katerimi bi lahko izvedli meritve.
 Ker imamo dostop do raèunalnika Raspberry Pi \footnote{http://www.raspberrypi.org/} in predvsem zastonjskih verzij oblaènih storitev, nas zanima primerjava med temi platformami. Raspberry Pi je raèunalnik, ki stane okrog 30 evrov in ne porabi praktièno niè elektrike, v zameno pa ponuja primerno majhno zmogljivost. Ne plaèljive oblaène storitve so moèno èasovno omejene ali pa ponujajo prav tako zelo majhne zmogljivosti.
-Zaradi naših predznanj lahko storitev za strežnik, katerega ustroj in delovanje poznamo, bolje optimiziramo, kot oblaèno storitev, kar je prav tako vredno preveriti.
+Zaradi naših predznanj lahko storitev za strežnik\ref{fig:miselni}, katerega ustroj in delovanje poznamo, bolje optimiziramo, kot oblaèno storitev, kar je prav tako vredno preveriti.
 
 Ker pa je implementacija optimizirane storitve in postavitev lastne gruèe relativno zahtevno opravilo, mi pa imamo na voljo omejen èas, smo se odloèili za testiranje zmogljivosti gruèe raèunalnikov Raspberry Pi. Le ti so se v zadnjem èasu zaradi nizke cene na mnogih podroèjih raèunalništva zaèeli uporabljati. Nas zanima, ali so raèunalniki takšnega tipa primerni tudi za uporabo na podroèjih, ki zahtevajo raèunsko moè. Na podlagi izmerjenih rezultatov lahko primerjamo zmogljivost z drugaènimi sistemi, na katerih so meritve že opravljene. Prav tako lahko nadaljujemo raziskovanje na tem podroèju z poskusom optimizacije enake storitve na drugaènem sistemu v prihodnosti.
 
@@ -47,10 +47,10 @@ Cilj primerjave je ugotoviti, ali je raèunalnik Raspberry Pi primeren za postavi
 \centerline{\includegraphics[scale=0.3]
 {4_foto.eps}}
 \caption{Fotografija gruèe. Na levi je 100 megabitno stikalo, na desni pa raèunalniki Raspberry Pi na pladnju.}
-\label{fig:fotog}
+\label{fig:foto}
 \end{figure}
 
-Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè. Namenjena je zaganjanju porazdeljenih programov. V mrežo smo povezali štiri raèunalnike Raspberry Pi, model 1B, tri modele 1B+. Povezani so v gruèo s pomoèjo knjižnjice MPI\footnote{Message Passing Interface, knjižnjica za medprocesno komunikacijo prek omrežja ali na lokalnem raèunalnikom}. Do njega imamo SSH dostop tudi z zunanjega omrežja. Storitev je dostopna prek strežnika, ki smo ga implementirali sami. Programska koda strežnika in implementacije algoritma FFT je v prilogi.
+Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè\ref{fig:foto}. Namenjena je zaganjanju porazdeljenih programov. V mrežo smo povezali štiri raèunalnike Raspberry Pi, model 1B, tri modele 1B+. Povezani so v gruèo s pomoèjo knjižnjice MPI\footnote{Message Passing Interface, knjižnjica za medprocesno komunikacijo prek omrežja ali na lokalnem raèunalnikom}. Do njega imamo SSH dostop tudi z zunanjega omrežja. Storitev je dostopna prek strežnika, ki smo ga implementirali sami. Programska koda strežnika in implementacije algoritma FFT je v prilogi.
 
 \begin{figure}[H]
 \centerline{\includegraphics[scale=1.5]
@@ -59,7 +59,9 @@ Naš sistem je gruèa raèunalnikov, narejena po vzoru Beowulf gruè. Namenjena je z
 \label{fig:gruca}
 \end{figure}
 
-Do tega sistema dostopamo s klienti, ki so izven lokalnega omrežja. Gruèo uporabljamo kot raèunski strežnik, ki po zahtevi klienta izvaja porazdeljeno hitro Fourierjevo transformacijo. Klient prek omrežja pošlje podatke v obliki glasbene datoteke, gruèa pa podatke sprejme (to stori strežnik, ki teèe na master raèunalniku gruèe) in izvajanje algoritma porazdeli prek vseh raèunalnikov v gruèi, vkljuèno s sabo.
+Do tega sistema dostopamo s klienti, ki so izven lokalnega omrežja\ref{fig:gruca}. Gruèo uporabljamo kot raèunski strežnik, ki po zahtevi klienta izvaja porazdeljeno hitro Fourierjevo transformacijo. Klient prek omrežja pošlje podatke v obliki glasbene datoteke, gruèa pa podatke sprejme (to stori strežnik, ki teèe na master raèunalniku gruèe) in izvajanje algoritma porazdeli prek vseh raèunalnikov v gruèi, vkljuèno s sabo.
+
+Gruèa se nahaja na Velikem Loèniku, na omrežju Telekoma. Dostopna je prek širokopasovne povezave po optiènem kablu (angl. \textit{FTTH - fiber to the home}) s hitrostjo 20Mb/s v obe smeri. Vse povezave po hiši so po bakreni parici kategorije 6, omrežna oprema pa je prepustna najmanj 100Mb/s.
 
 V zaèetku smo testirali dostop do gruèe od zunaj in delovanje sistema MPI na raèunalniku rpi1. To smo storili tako, da smo na njem poganjali z MPI implementiran algoritem porazdeljeni Quicksort (porazdeljeno hitro urejanje\footnote{http://en.wikipedia.org/wiki/Quicksort\#Parallelization}).
 
@@ -102,11 +104,13 @@ Izvajamo veè meritev:
 \item skupna hitrost obdelava podatkov v bajtih na sekundo.
 \end{itemize}
 
-Meritev èasa izvajanja raèunanja in meritev èasa prenosa podatkov med procesi smo ponovili tudi na raèunalniku s procesorjem Intel i5-3317U, s frekvenco ure 1,7GHz in 4GB DDR3 delovnega spomina in 3MB L3 cache-a. Pri tem smo program izvajali lokalno, brez strežnika. Rezultati nam dajo primerjavo med 
+Meritev èasa izvajanja raèunanja in meritev èasa prenosa podatkov med procesi smo ponovili tudi na raèunalniku s procesorjem Intel i5-3317U, s frekvenco ure 1,7GHz in 4GB DDR3 delovnega spomina in 3MB L3 cache-a. Pri tem smo program izvajali lokalno, brez strežnika. Rezultati nam dajo primerjavo med veèjedrnim procesorjem s hyperthreadingom in gruèo enojedrnih. Bralec lahko primerja tudi zmogljivost glede na ceno, pri èimer mora vedeti, da raèunalnik Raspberry Pi stane okrog 30€, stikalo, ki smo ga uporabili, stane 40€ do 100€, raèunalnik z Intelovim procesorjem, ki smo ga uporabili, pa okrog 800€.
+
+%%% TODO ker swittch mamo
 
 Mertive smo izvedli na 1, 2 in 4 raèunalnikih v gruèi. Izvedli smo teste z enim 1, 5, 20, 60 in 180 sekund dolgo vhodno zvoèno datoteko in z 1, 5 in 10 vhodnimi datotekami velikosti 5 sekund. Posebej smo testirali še veè datotek po 180 sekund, s èimer smo uspeli sesuti gruèo.
 
-Zaradi zelo dolgega èasa izvajanja storitve za datoteke, dolge 180s, smo to meritev izvajali le na vseh 4 raèunalnikih v gruèi.
+Zaradi zelo dolgega èasa izvajanja storitve za datoteke, dolge 180s, smo to meritev izvajali le na vseh 4 raèunalnikih v gruèi in na procesorju Intel i5.
 
 Vse teste smo ponovili trikrat.  
 
@@ -114,7 +118,7 @@ Vse teste smo ponovili trikrat.
 %%============================= èas zahtevka =============================
 
 \subsection{Izmerjeni èasi: 1 datoteka, razliène velikosti datoteke}
-Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika. Meritve za 180 sekund dolgo zvoèno datoteko pri zmanjšanem številu elementov v gruèi nismo opravili zarada prevelikega èasa izvajanja.
+Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika. 
 \begin{table}[h]
 \begin{tabular}{l|ccccc}
 RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
@@ -202,21 +206,14 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centerline{\includegraphics[scale=1.5]
+{4_pretocnost.eps}}
+\caption{Graf hitrosti obdelave podatkov.}
+\label{fig:pretocnost}
+\end{figure}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Na grafu \ref{fig:pretocnost} vidimo primerjave hitrosti obdelave podatkov za celotno storitev (velikost datoteke v kilobajtih deljena s èasom, kot ga vidi klient). Zanimivo je, da je oèitno okrog datotek velikosti 20 sekund optimalna toèka, pri kateri se èasi obdelave podatkov, prenosa podatkov in latenca omrežja pridejo v za uporabnika najboljše razmerje. Lahko razberemo tudi, da je hitrost obdelave odvisno skoraj linearno od števila raèunalnikov v sistemu. To pomeni, da še nismo dosegli maksimalne pohitritve po Amdahlovem zakonu in bi s podvojitvijo števila raèunalnikov lahko še vsaj enkrat podvojili zmogljivost gruèe.
 
 
 \subsection{Èas izvajanja algoritma FFT na raèunalniku s procesorjem i5, za primerjavo raèunske zmogljivosti}
@@ -238,11 +235,15 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centerline{\includegraphics[scale=1.5]
+{4_obdelava.eps}}
+\caption{Graf èasov izvajanja obdelave podatkov.}
+\label{fig:obdelava}
+\end{figure}
 
-
-
-
-
+Na grafu \ref{fig:obdelava} vidimo primerjavo èasov izvajanja algoritma FFT. Na abscisni osi so razliène dolžine datotek, na ordinatni pa èas izvajanja. Skala je povsod linearna. Razlièni grafi predstavljajo meritve razliènih konfiguracij sistema. Najhitrejši, oznaèen kot Intel i5, je en dvojedrni procesor s hyperthreadingom. Glede na celotno ceno sistema se gruèa izkaže za boljšo rešitev.
+Zanimiva je tudi primerjava med gruèo z razliènim številom vozlišè, saj je pohitritev praktièno linearno odvisna od števila vozlišè v gruèi.
 
 
 
@@ -378,8 +379,7 @@ RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
 
 
 
-
-Razlika med 2 in 3 vozlišèi je premajhna, da bi lahko sklepali na pohitritev. Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti.
+Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti, kar je tudi razlog, da po zaèetnem poskusu nismo opravljali testov na gruèi velikosti 3.
 
 Ker za dovolj velik $n$ velja $n*log(n) > n*log(n/m)*m$, je hitrost reševanja problem veèja, èe rešujemo veè manjših problem, kot enega velikega. To je razlog, da ne porazdeljujemo po gruèi po drevesu razcepa podatkov, ki ga izvaja FFT, ampak razdelimo vse podatke na $m$ delov in nato odbelujemo vsakega posebej, pri èemer je $m$ število raèunalnikov v gruèi. To je slaba rešitev za zelo velik $m$ ali zelo majhne zahtevke, saj bi se lahko poznala izguba kvalitete zvoka, ki jo to prinese. Razlika se na normalnih zahtevkih in našem $m$ sicer ne pozna. Takšen pristop se uporablja tudi v praksi, predvsem kadar se izvaja transformacije v realnem èasu (sproti).
 
