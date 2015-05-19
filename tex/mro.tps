@@ -12,13 +12,13 @@ MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
 NormalPos.right=1008
-NormalPos.bottom=333
+NormalPos.bottom=581
 Class=LaTeXView
-Document=poglavje04.tex
+Document=mro.tex
 
 [Frame0_View0,0]
-TopLine=26
-Cursor=2347
+TopLine=36
+Cursor=894
 
 [Frame1]
 Flags=0
@@ -30,13 +30,13 @@ MaxPos.y=-1
 NormalPos.left=4
 NormalPos.top=26
 NormalPos.right=1008
-NormalPos.bottom=333
+NormalPos.bottom=581
 Class=LaTeXView
-Document=mro.tex
+Document=poglavje04.tex
 
 [Frame1_View0,0]
-TopLine=45
-Cursor=894
+TopLine=335
+Cursor=20046
 
 [SessionInfo]
 FrameCount=2

@@ -43,8 +43,8 @@ Cilj primerjave je ugotoviti, ali je raèunalnik Raspberry Pi primeren za postavi
 \section{Sistem}
 
 %%%%%%%%%%%%%%%%%%% FOTOGRAFIJA %%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[htbf]
-\centerline{\includegraphics[scale=0.3]
+\begin{figure}[H]
+\centerline{\includegraphics[scale=0.1]
 {4_foto.eps}}
 \caption{Fotografija gruèe. Na levi je 100 megabitno stikalo, na desni pa raèunalniki Raspberry Pi na pladnju.}
 \label{fig:foto}
@@ -104,7 +104,7 @@ Izvajamo veè meritev:
 \item skupna hitrost obdelava podatkov v bajtih na sekundo.
 \end{itemize}
 
-Meritev èasa izvajanja raèunanja in meritev èasa prenosa podatkov med procesi smo ponovili tudi na raèunalniku s procesorjem Intel i5-3317U, s frekvenco ure 1,7GHz in 4GB DDR3 delovnega spomina in 3MB L3 cache-a. Pri tem smo program izvajali lokalno, brez strežnika. Rezultati nam dajo primerjavo med veèjedrnim procesorjem s hyperthreadingom in gruèo enojedrnih. Bralec lahko primerja tudi zmogljivost glede na ceno, pri èimer mora vedeti, da raèunalnik Raspberry Pi stane okrog 30€, stikalo, ki smo ga uporabili, stane 40€ do 100€, raèunalnik z Intelovim procesorjem, ki smo ga uporabili, pa okrog 800€.
+Meritev èasa izvajanja raèunanja in meritev èasa prenosa podatkov med procesi smo ponovili tudi na raèunalniku s procesorjem Intel i5-3317U, s frekvenco ure 1,7GHz in 4GB DDR3 delovnega spomina in 3MB L3 cache-a. Pri tem smo program izvajali lokalno, brez strežnika. Rezultati nam dajo primerjavo med veèjedrnim procesorjem s hyperthreadingom in gruèo enojedrnih. Bralec lahko primerja tudi zmogljivost glede na ceno, pri èimer mora vedeti, da raèunalnik Raspberry Pi stane okrog 30 evrov, stikalo, ki smo ga uporabili, stane 40 evrov do 100 evrov, raèunalnik z Intelovim procesorjem, ki smo ga uporabili, pa okrog 800 evrov.
 
 %%% TODO ker swittch mamo
 
@@ -207,7 +207,7 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \end{table}
 
 \begin{figure}[H]
-\centerline{\includegraphics[scale=1.5]
+\centerline{\includegraphics[scale=1]
 {4_pretocnost.eps}}
 \caption{Graf hitrosti obdelave podatkov.}
 \label{fig:pretocnost}
@@ -236,7 +236,7 @@ Na grafu \ref{fig:pretocnost} vidimo primerjave hitrosti obdelave podatkov za ce
 \end{table}
 
 \begin{figure}[H]
-\centerline{\includegraphics[scale=1.5]
+\centerline{\includegraphics[scale=1]
 {4_obdelava.eps}}
 \caption{Graf èasov izvajanja obdelave podatkov.}
 \label{fig:obdelava}
@@ -257,19 +257,20 @@ Zanimiva je tudi primerjava med gruèo z razliènim številom vozlišè, saj je pohit
 
 %%%====================== konst size = 5s, var num =======================
 %%============================= èas zahtevka =============================
+\iffalse
 
 \subsection{Izmerjeni èasi izvajanja celotnega zahtevka: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
 \begin{table}[h]
 \begin{tabular}{l|ccc }
-RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10                \\ \cline{1-5}
+RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10                \\ \cline{1-4}
 1    & 21,85     & 102,38     & 208,68                   \\
      & 20,70     & 104,35     & 203,89                   \\
-     & 21,73     & 103,75     & 218,35                   \\ \cline{1-5}
+     & 21,73     & 103,75     & 218,35                   \\ \cline{1-4}
 
 2    & 14,50     &  70,95     & 126,58                   \\
      & 14,08     &  70,32     & 150,61                   \\
-     & 13,08     &  71,55     & 129,25                   \\ \cline{1-5}
+     & 13,08     &  71,55     & 129,25                   \\ \cline{1-4}
 
 4    & 10,67     &  55,44     &  98,99                   \\
      & 10,66     &  55,93     &  95,94                   \\
@@ -376,7 +377,7 @@ RPIs & N[f] = 1  & N[f] = 5   & N[f] = 10  & N[f] = 200  \\ \cline{1-5}
 
 
 
-
+\fi
 
 
 Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti, kar je tudi razlog, da po zaèetnem poskusu nismo opravljali testov na gruèi velikosti 3.
