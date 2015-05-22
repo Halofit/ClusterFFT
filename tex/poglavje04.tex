@@ -138,7 +138,7 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 
 
 
-%%============================= overhead =============================
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ÈAS OMREŽJA V SEKUNDAH ZA 1 FAJL
 
 \subsection{Izmerjeni èasi prenosa podatkov in režije (angl. \textit{overhead}) v sekundah: 1 datoteka, razliène velikosti datoteke}
 
@@ -159,31 +159,7 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \end{tabular}
 \end{table}
 
-%èas fftja v sekundah
-%1,11		4,56		20,40	      85,25
-%1,07		4,50		20,05
-%1,06		4,63		19,45	
 
-%%================================ hitrost raèunanja ==============================
-
-\subsection{Izmerjen èas raèunananja FFT v sekundah: 1 datoteka, razliène velikosti datoteke}
-
-\begin{table}[h]
-\begin{tabular}{l|ccccc}
-RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
-1    & 4,71      & 18,16     & 82,15      & 357,95     &  -         \\
-     & 5,15      & 18,70     & 79,56      & 345,43      &  -        \\
-     & 4,26      & 19,90     & 82,18      & 348,29       &  -       \\ \cline{1-6}
-
-2    & 2,16      & 9,23      & 39,93      & 166,33    &  -         \\
-     & 2,15      & 9,64      & 41,16      & 171,19     &  -         \\
-     & 2,12      & 9,24      & 39,71      & 173,15      &  -        \\ \cline{1-6}
-
-4    &  79,20    &  96,80    &  86,46     &  59,17     &  88,68     \\
-     &  82,61    &  98,04    &  87,99     &  63,85     &  90,70     \\
-     &  83,39    &  95,39    &  90,70     &  62,09     &  78,06     \\
-\end{tabular}
-\end{table}
 
 %%================================ hitrost raèunanja ============================= bajti na service
 
@@ -216,6 +192,41 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 Na grafu \ref{fig:pretocnost} vidimo primerjave hitrosti obdelave podatkov za celotno storitev (velikost datoteke v kilobajtih deljena s èasom, kot ga vidi klient). Zanimivo je, da je oèitno okrog datotek velikosti 20 sekund optimalna toèka, pri kateri se èasi obdelave podatkov, prenosa podatkov in latenca omrežja pridejo v za uporabnika najboljše razmerje. Lahko razberemo tudi, da je hitrost obdelave odvisno skoraj linearno od števila raèunalnikov v sistemu. To pomeni, da še nismo dosegli maksimalne pohitritve po Amdahlovem zakonu in bi s podvojitvijo števila raèunalnikov lahko še vsaj enkrat podvojili zmogljivost gruèe.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%% FFT ÈAS NA GRUÈI
+\subsection{Izmerjen èas raèunananja FFT v sekundah: 1 datoteka, razliène velikosti datoteke}
+
+\begin{table}[h]
+\begin{tabular}{l|ccccc}
+RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-6}
+1    & 4,71      & 18,16     & 82,15      & 357,95     &  -         \\
+     & 5,15      & 18,70     & 79,56      & 345,43      &  -        \\
+     & 4,26      & 19,90     & 82,18      & 348,29       &  -       \\ \cline{1-6}
+
+2    & 2,16      & 9,23      & 39,93      & 166,33    &  -         \\
+     & 2,15      & 9,64      & 41,16      & 171,19     &  -         \\
+     & 2,12      & 9,24      & 39,71      & 173,15      &  -        \\ \cline{1-6}
+
+4    &  79,20    &  96,80    &  86,46     &  59,17     &  88,68     \\
+     &  82,61    &  98,04    &  87,99     &  63,85     &  90,70     \\
+     &  83,39    &  95,39    &  90,70     &  62,09     &  78,06     \\
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%% FFT ÈAS NA INTELU
 \subsection{Èas izvajanja algoritma FFT na raèunalniku s procesorjem i5, za primerjavo raèunske zmogljivosti}
 
 \begin{table}[h]
@@ -244,6 +255,48 @@ Na grafu \ref{fig:pretocnost} vidimo primerjave hitrosti obdelave podatkov za ce
 
 Na grafu \ref{fig:obdelava} vidimo primerjavo èasov izvajanja algoritma FFT. Na abscisni osi so razliène dolžine datotek, na ordinatni pa èas izvajanja. Skala je povsod linearna. Razlièni grafi predstavljajo meritve razliènih konfiguracij sistema. Najhitrejši, oznaèen kot Intel i5, je en dvojedrni procesor s hyperthreadingom. Glede na celotno ceno sistema se gruèa izkaže za boljšo rešitev.
 Zanimiva je tudi primerjava med gruèo z razliènim številom vozlišè, saj je pohitritev praktièno linearno odvisna od števila vozlišè v gruèi.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
