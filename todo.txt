@@ -7,3 +7,6 @@ Referneca na tabelo
 Še tiste meritve - grafi
 
 Ponedeljek pdf in izvorna koda (tex)
+
+Omeni da sta ethernet in disk na istem vodilu
+Omeni da odpiranja in branja datotek nikjer ne merimo
