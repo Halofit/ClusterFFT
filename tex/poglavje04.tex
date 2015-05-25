@@ -168,8 +168,6 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  & n[s] = 180 \\ \cline{1-
 \caption{Tabela izmerjenih vrednosti èasa prenosa podatkov na prek omrežja na gruèo.}
 \end{table}
 
-
-
 %%================================ hitrost raèunanja ============================= bajti na service
 
 \subsection{Izmerjena hitrost obdelave podatkov v kB/s: 1 datoteka, razliène velikosti datoteke}
@@ -190,6 +188,7 @@ RPIs & n[s] = 1  & n[s] = 5  & n[s] = 20  & n[s] = 60  \\ \cline{1-6}
      &  17230    &  47181    &  70283     & 58203      \\
 \end{tabular}
 \caption{Tabela izmerjenih vrednosti hitrosti obdelave podatkov. n[s] je dolžina zvoène datoteke v sekundah, RPIs pomeni število vozlišè v gruèi.}
+\label{hitrost1}
 \end{table}
 
 \begin{figure}[H]
@@ -256,57 +255,6 @@ Na grafu \ref{fig:obdelava} vidimo primerjavo èasov izvajanja algoritma FFT. Na 
 Zanimiva je tudi primerjava med gruèo z razliènim številom vozlišè, saj je pohitritev praktièno linearno odvisna od števila vozlišè v gruèi.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 %%%====================== konst size = 5s, var num =======================
 %%============================= èas zahtevka =============================
 %\iffalse
@@ -335,14 +283,14 @@ RPIs & N[f] = 1 & N[f] = 5 & N[f] = 10 \\ \cline{1-4}
 \centerline{\includegraphics[scale=1]
 {4_razlicnoSteviloDatotek.eps}}
 \caption{Graf èasov izvajanja celotnega zahtevka za veè datotek.}
-\label{fig:obdelava}
+\label{fig:obdelavamany}
 \end{figure}
 
-Iz grafa \ref{fig:obdelava} vidimo, da je èas izvajanja približno linearno odvisen od števila datotek. To je razumljivo, saj gre za veè ponovitev enakega zahtevka. Èe bi število datotek zelo poveèali, bi najbrž prišlo do velike upoèasnitve, ko bi zaèelo zmanjkovati spomina na gruèi, vendar se ob tem skoraj istoèasno tudi gruèa sesuje, ker je zaradi majhnega zunanjega pomnilnika (SSD kartica) zelo malo swap prostora, kar pomeni, da zmanjka celotnega pomnilnika skoraj istoèasno kot delovnega pomnilnika. Glej poglavje \ref{sec:zakljucek}.
+Iz grafa \ref{fig:obdelavamany} vidimo, da je èas izvajanja približno linearno odvisen od števila datotek. To je razumljivo, saj gre za veè ponovitev enakega zahtevka. Èe bi število datotek zelo poveèali, bi najbrž prišlo do velike upoèasnitve, ko bi zaèelo zmanjkovati spomina na gruèi, vendar se ob tem skoraj istoèasno tudi gruèa sesuje, ker je zaradi majhnega zunanjega pomnilnika (SSD kartica) zelo malo swap prostora, kar pomeni, da zmanjka celotnega pomnilnika skoraj istoèasno kot delovnega pomnilnika. Glej poglavje \ref{sec:zakljucek}.
 
 %%============================= overheadm MPI graf hoèm =============================
 
-\subsection{Izmerjeni èasi pošiljanja podatkov po gruèi: datoteka dolga 5s, razlièno število datotek v zahtevku}
+\subsection{Izmerjeni èasi porazdelitve podatkov po gruèi: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
 \begin{table}[h]
 \begin{tabular}{l|cccc}
@@ -359,14 +307,21 @@ RPIs & N[f] = 5 & N[f] = 10 \\ \cline{1-3}
      & 0,816 & 1,63 \\
      & 0,810 & 1,69 \\
 \end{tabular}
-\label{mpiovermany}
 \end{table}
 
-Iz tabele \ref{mpiovermany} vidimo, da so èasi porazdelitve podatkov po gruèi (MPI scatter in gather funkciji) zelo manjhni in predstavljajo reda 1% celotnega èasa izvajanja.
+
+\begin{figure}[H]
+\centerline{\includegraphics[scale=1]
+{4_mpiOverMany.eps}}
+\caption{Graf èasov pošiljanja porazdelitve podatkov po gruèi za veè datotek.}
+\label{fig:mpiovermany}
+\end{figure}
+
+Iz grafa \ref{fig:mpiovermany} vidimo, da so èasi porazdelitve podatkov po gruèi (MPI scatter in gather funkciji) zelo manjhni in predstavljajo reda 1% celotnega èasa izvajanja. Zanimivo je, da je razlika v èasu prenosa majhna pri prehodu iz dveh vozlišè na 4, zelo velik pa je pri prehodu iz enega na dve. To je razumljivo, saj v primeru enega vozlišèa podatkov ni treba nikamor razpošiljati, pri veèih pa mora podatke poslati prek lokalnega omrežja na druge raèunalnike.
 
 %%================================ hitrost raèunanja ============================= FFT
 
-\subsection{Izmerjena hitrost obdelave podatkov v kB/s: datoteka dolga 5s, razlièno število datotek v zahtevku}
+\subsection{Izmerjen èas izvajanja alogritma FFT: datoteka dolga 5s, razlièno število datotek v zahtevku}
 
 \begin{table}[h]
 \begin{tabular}{l|cccc}
@@ -383,7 +338,10 @@ RPIs & N[f] = 5 & N[f] = 10 \\ \cline{1-3}
      & 23,23 & 46,48 \\
      & 23,42 & 48,38 \\
 \end{tabular}
+\caption{Graf èasov izvajanja FFT. F[f] pomeni število 5 sekundnih datotek, RPIs pa število vozlišè v gruèi.}
 \end{table}
+
+Podatki kažejo na linearno pohitritev glede na število vozlišè in linearno poveèanja èasa glede na število datotek.
 
 %%================================ hitrost raèunanja ============================= seervice
 
@@ -406,6 +364,7 @@ RPIs & N[f] = 5   & N[f] = 10  \\ \cline{1-3}
 \end{tabular}
 \end{table}
 
+Maksimalna hitrost obdelave podatko je veliko manjša pri veè majhnih datotek kot pri eni veliki. Zanimiva je primerjava s tabelo \ref{hitrost1}.
 
 
 
@@ -417,25 +376,41 @@ RPIs & N[f] = 5   & N[f] = 10  \\ \cline{1-3}
 
 
 
+\subsection{Izmerjeni èasi izvajanja celotne storitve: veè klientov, ena datoteka, dolga 5 sekund}
+Meritev celotnega èasa izvajanja storitve od trenutka, ko klient zaène pošiljati podatke, do trenutka, ko se do konca prenese odgovor strežnika. 
+\begin{table}[h]
+\begin{tabular}{l|ccccc}
+RPIs & 2 klienta  & 4 klienti & 8 klientov \\ \cline{1-4}
+4    & 17,04      & 30,76     & 56,21     \\
+     & 16,20      & 31,40     & 45,14     \\
+     & 16,83      & 30,89     & nuspešno  \\
+\end{tabular}
+\caption{Tabela meritev èasa izvajanja celotne storitve pri veè klientih. }
+\end{table}
+
+Namen teh meritev je bila predvsem ugotoviti, kdaj se bo strežnik sesul. Pri 8 ali veè klientih zaène zapirati nekatere povezave, nato pa se sesuje. Klienti se sesujejo, kadar je povezava prekinjena. 
+Meritve so povpreèni rezultati vseh uspešnih klientov. Pri tretji meritvi z 8 klienti se je strežnik sesul, zato meritve ni.
 
 
 
+\section{Komentarji in zakljuèek} \label{sec:zakljucek}
 
-
-
-
-
-
-
-
-
-
-
-%\fi
-
-\section{Zakljuèek} \label{sec:zakljucek}
-
-Zaradi tipa algoritma (FFT se rekurzivno deli vedno na dva dela, zato deluje dobro le, èe uporabljamo $2^n$ paralelnih niti, kar je tudi razlog, da po zaèetnem poskusu nismo opravljali testov na gruèi velikosti 3.
+\subsection{Algoritem FFT in naša implementacija}
 
 Ker za dovolj velik $n$ velja $n*log(n) > n*log(n/m)*m$, je hitrost reševanja problem veèja, èe rešujemo veè manjših problem, kot enega velikega. To je razlog, da ne porazdeljujemo po gruèi po drevesu razcepa podatkov, ki ga izvaja FFT, ampak razdelimo vse podatke na $m$ delov in nato odbelujemo vsakega posebej, pri èemer je $m$ število raèunalnikov v gruèi. To je slaba rešitev za zelo velik $m$ ali zelo majhne zahtevke, saj bi se lahko poznala izguba kvalitete zvoka, ki jo to prinese. Razlika se na normalnih zahtevkih in našem $m$ sicer ne pozna. Takšen pristop se uporablja tudi v praksi, predvsem kadar se izvaja transformacije v realnem èasu (sproti).
 
+\subsection{Maksimalna obremenjenost gruèe pred sesutjem}
+
+Z eno datoteko nam ni uspelo sesuti gruèe, je pa pri zvoènih datotekah, dolgih 3 minute, èas izvajanja narasel nad mejo uporabnega. 
+
+Poskusili smo sesuti gruèo tudi z veè datotekami, poslanimi z enega klienta. Izkazalo se je, da je naš program premalo požrešen, da bi na gruèi zmanjkalo delovnega spomina, zato nam tudi tako ni uspelo sesuti gruèe.
+
+Uspešno smo sesuli strežnik tako, da smo nanj povezali 10 klientov hkrati. Vsak klient je poslal eno datoteko. Strežnik je datoteke sprejemal, nato pa je nekatere povezave zaprl, nekatere pa so se izvedle uspešno. Kot nadaljne delo bi bilo zanimivo ugotoviti, zakaj se je to zgodilo in kako bi to prepreèili, saj za razlog nismo preprièani. Sumimo, da je zaradi neuspešnega klica sistemskega klica malloc (rezervacija spomina) prišlo do pisanja po nedovoljenem spominu.
+
+\subsection{Ugotovitve}
+
+Na podlagi vseh izmerjenih podatkov smo ugotovili, da je Beowulf gruèa, sestavljena iz raèunalnikov Raspberry Pi ugodna rešitev glede na razmerje med ceno in zmogljivostjo. Zaradi zelo majhnega delovnega pomnilnika (512MB, model 2 verzija B+ pa 1GB) ni primerna za reševanje velikih problemov. Pri doloèenih problemih, naprimer našem, je ta težava rešljiva s pazljivim programiranjem, pri mnogih pa ni.
+
+Ker je pri uporabi gruèe vedno prisotna režija (predvsem porazdeljevanje ali kopiranje podatkov po gruèi), je en zelo zmogljiv sistem boljši od gruèe majhnih raèunalnikov, vendar na raèun visoke cene. Razlika je oèitna - na enem raèunalniku je èas režije 20 do 40krat manjši kot na gruèi (glej gref \ref{fig:mpiovermany}).
+
+Ko smo testirali z veè instancami klienta hkrati, so se pojavile mnoge težave na našem strežniku. Mnogo klientov je prikinil, pri 10 ali veè klientih pa se je strežnik sesul. To nam pove, da naša konfiguracija ni primerna za uporabo v realnem svetu kot oddaljeno storitev. To je sicer težava naše implementacije in gruèe ali raèunalnikov Raspberry Pi.
