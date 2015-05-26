@@ -35,8 +35,8 @@ Class=LaTeXView
 Document=poglavje04.tex
 
 [Frame1_View0,0]
-TopLine=335
-Cursor=20046
+TopLine=556
+Cursor=0
 
 [SessionInfo]
 FrameCount=2
